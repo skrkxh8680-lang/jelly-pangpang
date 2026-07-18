@@ -111,8 +111,18 @@
   #repBar button { min-width:44px; padding:8px 10px; border-radius:10px; cursor:pointer;
     border:2px solid #4a5a8a; background:#2a3252; color:#eef2ff; font-family:'Jua',sans-serif; font-size:14px; }
   #repBar button:active { transform:translateY(2px); }
-  #repTrack { flex:1 1 auto; height:8px; border-radius:5px; background:#28304e; overflow:hidden; }
+  #repMid { flex:1 1 auto; display:flex; flex-direction:column; gap:3px; min-width:0; }
+  #repTrack { height:8px; border-radius:5px; background:#28304e; overflow:hidden; cursor:pointer; }
+  #repTime { font-family:'Jua',sans-serif; font-size:10px; color:#8b97bd; text-align:center; }
+  /* [v74] 재생 중 배지 — 판과 헷갈리지 않게 화면 위쪽에 조용히 띄운다 */
+  #repBadge { position:fixed; left:50%; top:calc(8px + env(safe-area-inset-top)); transform:translateX(-50%);
+    z-index:131; padding:5px 14px; border-radius:20px; pointer-events:none;
+    background:rgba(12,16,32,.82); border:2px solid #ffd166; color:#ffd166;
+    font-family:'Jua',sans-serif; font-size:12px; white-space:nowrap; }
   #repProg { height:100%; width:0%; background:linear-gradient(90deg,#7bd88f,#ffd166); transition:width .1s linear; }
+  /* [v72] 녹화 중 표시 — 빨갛게 깜빡여야 '지금 담기고 있다'가 읽힌다 */
+  #repSave.recing { background:#c0392b; border-color:#e74c3c; animation:repBlink 1s infinite; }
+  @keyframes repBlink { 0%,100%{ opacity:1; } 50%{ opacity:.45; } }
   body.replayOn #joy, body.replayOn #bombBtn, body.replayOn #emoteBtn,
   body.replayOn #pauseBtn, body.replayOn #midRetry { display:none !important; }
   #rankList { overflow-y:auto; min-height:0; overscroll-behavior:contain; }
@@ -358,12 +368,13 @@
     color:#ffd9e8; letter-spacing:5px;
     -webkit-text-stroke:1px #a34a6e; text-shadow:0 3px 0 #a34a6e; }
   .linkBtn {
-    margin-top:2px; padding:9px 24px; font-size:14px; color:#cfd8f5;
-    font-family:'Jua',sans-serif; background:rgba(40,46,80,.6);
+    margin-top:2px; padding:9px 24px; font-size:14px; color:#e6ecff;
+    font-family:'Jua',sans-serif;
+    background:linear-gradient(180deg, rgba(62,68,108,.62), rgba(38,44,74,.62));
     border:2px solid #4a5488; border-radius:999px; cursor:pointer;
-    box-shadow:0 2px 0 rgba(15,18,38,.8);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.09), 0 3px 0 rgba(15,18,38,.8);
   }
-  .linkBtn:active { transform:translateY(2px); box-shadow:none; background:#2a3252; }
+  .linkBtn:active { transform:translateY(3px); box-shadow:inset 0 1px 0 rgba(255,255,255,.05); background:#2a3252; }
 
   /* ---- 젤리 꾸미기 ---- */
   /* 시각 위계: ① 상단 미리보기 고정 → ② 탭 → ③ 현재 카테고리만 표시 → ④ 완료 버튼 항상 보임 */
@@ -613,27 +624,38 @@
     border-top-color:#57c7ff; animation:olspin .8s linear infinite; }
   @keyframes olspin { to { transform:rotate(360deg); } }
   .olWait { display:flex; gap:10px; align-items:center; justify-content:center; }
-  #titleLinks { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; }
+  #titleLinks { display:flex; flex-direction:column; align-items:center; gap:8px; }
+  #titleLinks > button { width:min(280px,80vw); min-height:48px; box-sizing:border-box; display:flex; align-items:center; justify-content:center; gap:6px; margin-top:0; }
+  /* [보조] 설정/카페/맵 — 큰 알약 대신 작은 아이콘 줄로 무게를 낮춰 첫인상을 정리한다 */
+  #titleUtil { display:flex; justify-content:center; gap:16px; margin-top:6px; }
+  #titleUtil .utilBtn {
+    width:56px; height:56px; padding:0; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg, rgba(42,36,60,.62), rgba(26,22,40,.62));
+    border:1.5px solid #4a3a5a; border-radius:16px; cursor:pointer;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 2px 0 rgba(15,18,38,.7);
+    -webkit-tap-highlight-color:transparent;
+  }
+  #titleUtil .utilBtn .utilIco { font-size:26px; line-height:1; }
+  #titleUtil .utilBtn:active { transform:translateY(2px); box-shadow:none; background:rgba(40,34,58,.85); }
   /* [언어] 현재 언어 칩 — 언어가 늘어도 타이틀 UI는 그대로 (모달에서 선택) */
   #langRow { display:flex; justify-content:center; margin-top:10px; }
   #langChip {
-    display:flex; align-items:center; gap:7px;
-    padding:8px 16px; font-size:14px; font-family:'Jua',sans-serif; font-weight:800;
-    background:rgba(30,37,60,.85); border:2px solid #4a5688; border-radius:24px;
+    position:absolute; top:max(4px, env(safe-area-inset-top)); left:8px; z-index:5;
+    display:flex; align-items:center; gap:5px;
+    padding:5px 10px; font-size:12px; font-family:'Jua',sans-serif; font-weight:800;
+    background:rgba(20,16,32,.6); border:1.5px solid #4a3a5a; border-radius:12px;
     color:#e8ecff; cursor:pointer;
   }
   #langChip .langCaret { color:#8fa2d8; font-size:11px; }
   /* [언어] 선택 모달 — 목록은 JS가 LANGS로 자동 생성 */
   /* ---- [통합 설정] 팝업 ---- */
-  #setChip { display:flex; align-items:center; gap:6px; padding:8px 14px; border-radius:30px;
-    background:#1a2038; border:2px solid #323a5c; color:#cfd8ff;
-    font-family:'Jua',sans-serif; font-size:13px; font-weight:800; cursor:pointer; }
+  /* [설정] 타이틀 메뉴에서는 .linkBtn 과 동일 외형 — 별도 배경/테두리 없음 */
   #setPop { position:fixed; top:0; left:0; right:0; bottom:0; z-index:120; background:rgba(6,8,18,.72);
     display:flex; align-items:center; justify-content:center; padding:16px; }
   #setSheet { display:flex; flex-direction:column; gap:12px; width:min(360px, 94vw);
     max-height:min(80vh, 560px); overflow-y:auto; overscroll-behavior:contain;
     background:#161c31; border:2px solid #3a4468; border-radius:22px; padding:16px 14px;
-    box-shadow:0 10px 40px rgba(0,0,0,.6); }
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 40px rgba(0,0,0,.6); }
   #setSheetHead { font-family:'Jua',sans-serif; font-size:17px; font-weight:900; color:#ffd166; text-align:center; }
   /* [v64] 키 설정 팝업 — 설정 시트 위(z 130)에 겹친다. 한 컴퓨터에 둘이 앉을 때 각자 키를 정한다. */
   #keyPop { position:fixed; top:0; left:0; right:0; bottom:0; z-index:130; background:rgba(6,8,18,.82);
@@ -641,7 +663,7 @@
   #keySheet { display:flex; flex-direction:column; gap:10px; width:min(380px, 94vw);
     max-height:min(84vh, 600px); overflow-y:auto; overscroll-behavior:contain;
     background:#161c31; border:2px solid #3a4468; border-radius:22px; padding:16px 14px;
-    box-shadow:0 10px 40px rgba(0,0,0,.6); }
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.08), 0 10px 40px rgba(0,0,0,.6); }
   #segKeyTab { align-self:center; }
   #keyBody { display:flex; flex-direction:column; gap:10px; }
   .kpGroup { border:1.5px solid #39415e; border-radius:14px; padding:8px; background:#1a2032; }
@@ -671,14 +693,6 @@
      옮길 대상이 화면에 없어서 빈 화면만 나왔다(실기 제보). 편집은 언제 눌러도 되어야 한다. */
   body.ctlEdit #joy, body.ctlEdit #bombBtn, body.ctlEdit #emoteBtn { display:flex !important; }
   body.ctlEdit #joy { display:block !important; }
-  /* 편집 배경 — 실제 게임처럼 보이도록 어둡게 깔고 보드 자리를 표시한다 */
-  #ctlEditDim { position:fixed; inset:0; z-index:118; display:none;
-    background:radial-gradient(circle at 50% 45%, rgba(40,48,88,.55), rgba(10,12,26,.88)); }
-  body.ctlEdit #ctlEditDim { display:block; }
-  #ctlEditBoard { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
-    border:2px dashed rgba(255,255,255,.22); border-radius:10px;
-    display:flex; align-items:center; justify-content:center;
-    font-family:'Jua',sans-serif; font-size:12px; color:rgba(255,255,255,.35); }
   /* 편집 중인 조작부 — 끌 수 있다는 걸 눈으로 알린다 */
   body.ctlEdit #joy, body.ctlEdit #bombBtn, body.ctlEdit #emoteBtn {
     outline:3px dashed #ffd166; outline-offset:3px; opacity:.95; z-index:122; }
@@ -820,7 +834,15 @@
     width:44px; height:44px; border-radius:50%; border:3px solid rgba(255,255,255,.25);
     cursor:pointer; padding:0;
   }
-  .swatch.sel { border-color:#fff; box-shadow:0 0 0 3px #ffd166; }
+  .swatch.sel { border-color:#fff; box-shadow:0 0 0 3px #ffd166; animation:selPop .22s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes selPop { 0%{transform:scale(1)} 42%{transform:scale(1.14)} 100%{transform:scale(1)} }
+  /* [UI 연출] 모달·뷰 진입 애니메이션 — 팝업은 팝인, 뷰는 페이드. reduced-motion이면 위 media query가 자동 무력화 */
+  #setPop, #keyPop { animation:mdBackIn .2s ease-out; }
+  #setSheet, #keySheet { animation:mdSheetIn .26s cubic-bezier(.34,1.56,.64,1); }
+  #dressView, #shopView, #onlineView, #mapEdView { animation:viewIn .26s ease-out; }
+  @keyframes mdBackIn { from{opacity:0} to{opacity:1} }
+  @keyframes mdSheetIn { from{opacity:0; transform:translateY(14px) scale(.94)} to{opacity:1; transform:none} }
+  @keyframes viewIn { from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none} }
   #hats, #eyes, #mouths { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
   /* 촉감(슬라임) — 다른 옵션과 결 맞춰 가로 그리드. 갖고 싶은 실물 슬라임 타일 */
   #texes, #bombs, #effs { display:grid; grid-template-columns:repeat(3, 1fr); gap:10px; width:100%; }
@@ -1069,6 +1091,13 @@
   #pressStart { font-family:'Press Start 2P',monospace; font-size:11px; color:#ffe680;
     letter-spacing:2px; animation:blink 1s steps(2) infinite; }
   @keyframes blink { 50%{opacity:0} }
+  /* [접근성] 모션 최소화 설정 시 — 반복/장식 애니메이션을 진정시켜 멀미·산만을 줄인다(캔버스 게임 루프는 유지). */
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after {
+      animation-duration:.001ms !important; animation-iteration-count:1 !important;
+      transition-duration:.001ms !important; scroll-behavior:auto !important;
+    }
+  }
   #credit { font-family:'Press Start 2P',monospace; font-size:8px; color:#3d4670; margin-top:6px; }
 
   #resultView { display:flex; flex-direction:column; align-items:center; gap:12px;
@@ -1416,6 +1445,7 @@
     .setupHead { font-size:17px; margin:0; }
     /* 내 젤리 배지: 가로에선 타이틀에서만 — 다른 화면에선 콘텐츠(인원 버튼 등)를 가린다 */
     body:not([data-view="title"]) #meBadge { display:none !important; }
+    body:not([data-view="title"]) #langChip { display:none !important; }
     #meBadge { padding:4px 6px 3px; }
     #meBadge canvas { width:38px; height:42px; }
 
@@ -1655,14 +1685,6 @@
   </div>
   <!-- [v68] 조작부 위치 편집 — 실제 게임 화면 위에서 직접 끌어 옮긴다(참고: 브롤스타즈 조작 편집).
        설정창 안의 슬라이더로는 '내 손에 맞는 자리'를 못 찾는다. 눈으로 보고 손으로 옮겨야 한다. -->
-  <div id="ctlEditDim"><div id="ctlEditBoard" data-i18n="ceBoard">여기가 게임판이에요</div></div>
-  <div id="ctlEditBar" style="display:none">
-    <span id="ctlEditMsg" data-i18n="ceHint">버튼을 끌어서 옮겨요</span>
-    <div id="ctlEditBtns">
-      <button id="ctlEditReset" data-i18n="ceReset">↩ 재설정</button>
-      <button id="ctlEditSave" data-i18n="ceSave">✔ 저장</button>
-    </div>
-  </div>
   <!-- [v64] 키 설정 팝업 — 설정 시트 위에 겹쳐 뜬다. 부모와 아이가 한 키보드에 앉을 때 각자 키를 정한다. -->
   <div id="keyPop" style="display:none">
     <div id="keySheet">
@@ -1723,19 +1745,20 @@
   <canvas id="titleBg"></canvas>
   <div id="rotateHint"><span class="rhIco">📱</span><span data-i18n="rotateDuo">둘이서 모드는 세로로 잡아요!</span></div>
   <div id="meBadge"><canvas id="meCv" width="72" height="80"></canvas><span data-i18n="myJelly">내 젤리</span></div>
+  <button id="langChip"><span>🌐</span><span id="langChipTxt">한국어</span><span class="langCaret">▾</span></button>
   <div id="ovWrap">
   <div id="titleView">
     <canvas id="drop" width="120" height="120"></canvas>
     <div id="logo"></div>
     <div id="titleLinks">
       <button class="linkBtn" id="dressBtn" data-i18n="myRoom">🛏 내 방</button>
-      <button class="linkBtn" id="onlineBtn" data-i18n="online">🌐 친구와 대전</button>
       <button class="linkBtn" id="shopBtn" data-i18n="shopTitle">🛍 젤리 상점</button>
-      <button class="linkBtn" id="mapEdBtn" data-i18n="mapEdTitle">🛠 맵 만들기</button>
+      <button class="linkBtn" id="onlineBtn" data-i18n="online">🌐 친구와 대전</button>
     </div>
-    <div id="langRow">
-      <button id="langChip"><span>🌐</span><span id="langChipTxt">한국어</span><span class="langCaret">▾</span></button>
-      <button id="setChip"><span>⚙️</span><span data-i18n="stTitle">설정</span></button>
+    <div id="titleUtil">
+      <button class="utilBtn" id="setChip" data-i18n-title="stTitle"><span class="utilIco">⚙️</span></button>
+      <button class="utilBtn" id="cafeBtn" data-i18n-title="cafeTitle"><span class="utilIco">☕</span></button>
+      <button class="utilBtn" id="mapEdBtn" data-i18n-title="mapEdTitle"><span class="utilIco">🛠</span></button>
     </div>
   </div>
 
@@ -2063,13 +2086,7 @@
     </div>
   </div>
 
-  <!-- [v71] 리플레이 재생 바 — 게임 화면 위에 얹힌다 -->
-  <div id="repBar" style="display:none">
-    <button id="repPlay">⏸</button>
-    <div id="repTrack"><div id="repProg"></div></div>
-    <button id="repSpeed">1x</button>
-    <button id="repClose" data-i18n="rpClose">✕</button>
-  </div>
+
 
   <div id="pauseView" style="display:none">
     <div id="pauseTitle">PAUSE</div>
@@ -2132,6 +2149,31 @@
   <div id="credit"></div>
   </div>
 </div>
+
+<!-- [v73] 이 두 바는 (1) #overlay 밖이면서 (2) 스크립트보다 앞이어야 한다.
+     (1) overlay 안에 있으면 overlay를 숨길 때 함께 사라진다 — v72에서 리플레이 바가 그렇게 사라져
+         재생 화면에서 나갈 방법이 아예 없었다(크리티컬).
+     (2) 스크립트보다 뒤에 있으면 바인딩 시점에 요소가 없어 버튼이 죽는다 — 보이는데 안 눌린다.
+     둘 다 화면 최상단에 떠야 하는 UI라 여기(overlay 형제 · script 앞)가 유일하게 맞는 자리다. -->
+<div id="ctlEditBar" style="display:none">
+  <span id="ctlEditMsg" data-i18n="ceHint">버튼을 끌어서 옮겨요</span>
+  <div id="ctlEditBtns">
+    <button id="ctlEditReset" data-i18n="ceReset">↩ 재설정</button>
+    <button id="ctlEditSave" data-i18n="ceSave">✔ 저장</button>
+  </div>
+</div>
+<div id="repBar" style="display:none">
+  <button id="repPlay">⏸</button>
+  <div id="repMid">
+    <div id="repTrack"><div id="repProg"></div></div>
+    <div id="repTime">0:00 / 0:00</div>
+  </div>
+  <button id="repSpeed">1x</button>
+  <button id="repSave" title="save">💾</button>
+  <button id="repClose" data-i18n="rpClose">✕</button>
+</div>
+<!-- [v74] '지금 다시 보기 중'을 알리는 배지 — 없으면 판이 다시 시작된 걸로 오해한다 -->
+<div id="repBadge" style="display:none"><span data-i18n="rpWatching">🎬 다시 보기</span></div>
 
 <script>
 'use strict';
@@ -2315,7 +2357,7 @@ I18N['ar'] = {
   "it_balloon": '🎈 ركوب البالون!',
   "it_magnet": '🧲 مغناطيس!',
   "it_shock": '💫 موجة صدمة!',
-  "it_giant": '🍄 عملاق!',
+  "it_giant": '🔼 كبرت!',
   "it_gift": '🎁 صندوق هدايا!',
   "fl_caught": 'انكشفت!',
   "fl_wingLost": 'فقدت الأجنحة!',
@@ -2394,6 +2436,10 @@ I18N['ar'] = {
   "stBgm": '🎵 الموسيقى',
   "stSfx": '🔔 المؤثرات',
   "stPad": '🎮 وضع اليد',
+  "rpWatching": '🎬 إعادة',
+  "rpRecing": '⏺ جارٍ التسجيل…',
+  "rpSaved": '🎥 تم حفظ الفيديو!',
+  "rpNoRec": 'التسجيل غير مدعوم هنا',
   "rpWatch": '🎬 إعادة',
   "rpClose": '✕',
   "rpNone": 'لا توجد إعادة',
@@ -2501,6 +2547,7 @@ I18N['ar'] = {
   "gdOneThumb": 'اسحب بالإبهام',
   "gdKnobTap": 'انقر العصا!',
   "shopTitle": '🛍 متجر الجيلي',
+  "cafeTitle": '☕ المقهى الرسمي',
   "shReco": '⭐ مميز',
   "shSets": '🎁 أطقم',
   "shItems": '🎨 قطع',
@@ -2661,7 +2708,7 @@ I18N['ar'] = {
   "stCbHint": 'شغّله إذا كان الأحمر والأخضر متشابهين — ستصبح ألوان الجيلي سهلة التمييز',
   "phEmote": 'تعبير',
   "phPause": 'إيقاف',
-  "it_mini": '🍄 تقلّصت!',
+  "it_mini": '🔽 تقلّصت!',
   "fl_miniEnd": 'عاد كما كان!',
   "me_toolBush": 'شجيرة',
   "me_toolWater": 'ماء',
@@ -2832,7 +2879,7 @@ I18N['de'] = {
   "it_balloon": '🎈 Ballonflug!',
   "it_magnet": '🧲 Magnet!',
   "it_shock": '💫 Schockwelle!',
-  "it_giant": '🍄 Riese!',
+  "it_giant": '🔼 Größer!',
   "it_gift": '🎁 Geschenk!',
   "fl_caught": 'Entdeckt!',
   "fl_wingLost": 'Flügel weg!',
@@ -2911,6 +2958,10 @@ I18N['de'] = {
   "stBgm": '🎵 Musik',
   "stSfx": '🔔 Effekte',
   "stPad": '🎮 Gamepad-Modus',
+  "rpWatching": '🎬 Wiederholung',
+  "rpRecing": '⏺ Aufnahme…',
+  "rpSaved": '🎥 Video gespeichert!',
+  "rpNoRec": 'Aufnahme nicht unterstützt',
   "rpWatch": '🎬 Wiederholung',
   "rpClose": '✕',
   "rpNone": 'Keine Wiederholung',
@@ -3018,6 +3069,7 @@ I18N['de'] = {
   "gdOneThumb": 'Mit dem Daumen ziehen',
   "gdKnobTap": 'Joystick antippen!',
   "shopTitle": '🛍 Jelly-Shop',
+  "cafeTitle": '☕ Offizielles Café',
   "shReco": '⭐ Top',
   "shSets": '🎁 Sets',
   "shItems": '🎨 Einzeln',
@@ -3178,7 +3230,7 @@ I18N['de'] = {
   "stCbHint": 'Einschalten, wenn Rot und Grün gleich aussehen — Jellys bekommen gut unterscheidbare Farben',
   "phEmote": 'Emotion',
   "phPause": 'Pause',
-  "it_mini": '🍄 Geschrumpft!',
+  "it_mini": '🔽 Kleiner!',
   "fl_miniEnd": 'Wieder normal!',
   "me_toolBush": 'Busch',
   "me_toolWater": 'Wasser',
@@ -3349,7 +3401,7 @@ I18N['en'] = {
   "it_balloon": '🎈 Balloon Ride!',
   "it_magnet": '🧲 Magnet!',
   "it_shock": '💫 Shockwave!',
-  "it_giant": '🍄 Giant!',
+  "it_giant": '🔼 Bigger!',
   "it_gift": '🎁 Gift Box!',
   "fl_caught": 'Spotted!',
   "fl_wingLost": 'Wings lost!',
@@ -3428,6 +3480,10 @@ I18N['en'] = {
   "stBgm": '🎵 Music',
   "stSfx": '🔔 Sound FX',
   "stPad": '🎮 Gamepad Mode',
+  "rpWatching": '🎬 Replay',
+  "rpRecing": '⏺ Recording… file will download',
+  "rpSaved": '🎥 Video saved!',
+  "rpNoRec": 'Video saving isn\'t supported here',
   "rpWatch": '🎬 Watch replay',
   "rpClose": '✕',
   "rpNone": 'No replay saved',
@@ -3535,6 +3591,7 @@ I18N['en'] = {
   "gdOneThumb": 'Drag with a thumb',
   "gdKnobTap": 'Tap the stick!',
   "shopTitle": '🛍 Jelly Shop',
+  "cafeTitle": '☕ Official Cafe',
   "shReco": '⭐ Featured',
   "shSets": '🎁 Sets',
   "shItems": '🎨 Items',
@@ -3695,7 +3752,7 @@ I18N['en'] = {
   "stCbHint": 'Turn on if red and green look alike — jellies get easy-to-tell-apart colors',
   "phEmote": 'Emote',
   "phPause": 'Pause',
-  "it_mini": '🍄 Shrunk!',
+  "it_mini": '🔽 Smaller!',
   "fl_miniEnd": 'Back to size!',
   "me_toolBush": 'Bush',
   "me_toolWater": 'Water',
@@ -3866,7 +3923,7 @@ I18N['es'] = {
   "it_balloon": '🎈 ¡A volar en globo!',
   "it_magnet": '🧲 ¡Imán!',
   "it_shock": '💫 ¡Onda de choque!',
-  "it_giant": '🍄 ¡Gigante!',
+  "it_giant": '🔼 ¡Más grande!',
   "it_gift": '🎁 ¡Caja regalo!',
   "fl_caught": '¡Te vieron!',
   "fl_wingLost": '¡Alas rotas!',
@@ -3945,6 +4002,10 @@ I18N['es'] = {
   "stBgm": '🎵 Música',
   "stSfx": '🔔 Efectos',
   "stPad": '🎮 Modo mando',
+  "rpWatching": '🎬 Repetición',
+  "rpRecing": '⏺ Grabando…',
+  "rpSaved": '🎥 ¡Vídeo guardado!',
+  "rpNoRec": 'No se puede grabar aquí',
   "rpWatch": '🎬 Ver repetición',
   "rpClose": '✕',
   "rpNone": 'No hay repetición',
@@ -4052,6 +4113,7 @@ I18N['es'] = {
   "gdOneThumb": 'Arrastra con el pulgar',
   "gdKnobTap": '¡Toca el joystick!',
   "shopTitle": '🛍 Tienda de gelatina',
+  "cafeTitle": '☕ Café oficial',
   "shReco": '⭐ Destacado',
   "shSets": '🎁 Sets',
   "shItems": '🎨 Piezas',
@@ -4212,7 +4274,7 @@ I18N['es'] = {
   "stCbHint": 'Actívalo si el rojo y el verde se parecen — las gelatinas tendrán colores fáciles de distinguir',
   "phEmote": 'Emoción',
   "phPause": 'Pausa',
-  "it_mini": '🍄 ¡Encogido!',
+  "it_mini": '🔽 ¡Más pequeño!',
   "fl_miniEnd": '¡De vuelta!',
   "me_toolBush": 'Arbusto',
   "me_toolWater": 'Agua',
@@ -4383,7 +4445,7 @@ I18N['fr'] = {
   "it_balloon": '🎈 Vol en ballon !',
   "it_magnet": '🧲 Aimant !',
   "it_shock": '💫 Onde de choc !',
-  "it_giant": '🍄 Géant !',
+  "it_giant": '🔼 Plus grand !',
   "it_gift": '🎁 Cadeau !',
   "fl_caught": 'Repéré !',
   "fl_wingLost": 'Ailes perdues !',
@@ -4462,6 +4524,10 @@ I18N['fr'] = {
   "stBgm": '🎵 Musique',
   "stSfx": '🔔 Effets',
   "stPad": '🎮 Mode manette',
+  "rpWatching": '🎬 Replay',
+  "rpRecing": '⏺ Enregistrement…',
+  "rpSaved": '🎥 Vidéo enregistrée !',
+  "rpNoRec": 'Enregistrement non supporté',
   "rpWatch": '🎬 Revoir',
   "rpClose": '✕',
   "rpNone": 'Pas de replay',
@@ -4569,6 +4635,7 @@ I18N['fr'] = {
   "gdOneThumb": 'Glisse avec le pouce',
   "gdKnobTap": 'Touche le joystick !',
   "shopTitle": '🛍 Boutique Jelly',
+  "cafeTitle": '☕ Café officiel',
   "shReco": '⭐ Vedette',
   "shSets": '🎁 Packs',
   "shItems": '🎨 Articles',
@@ -4729,7 +4796,7 @@ I18N['fr'] = {
   "stCbHint": 'Active si le rouge et le vert se ressemblent — les gelées auront des couleurs faciles à distinguer',
   "phEmote": 'Émotion',
   "phPause": 'Pause',
-  "it_mini": '🍄 Rétréci !',
+  "it_mini": '🔽 Plus petit !',
   "fl_miniEnd": 'Revenu normal !',
   "me_toolBush": 'Buisson',
   "me_toolWater": 'Eau',
@@ -4900,7 +4967,7 @@ I18N['it'] = {
   "it_balloon": '🎈 In mongolfiera!',
   "it_magnet": '🧲 Calamita!',
   "it_shock": '💫 Onda d\'urto!',
-  "it_giant": '🍄 Gigante!',
+  "it_giant": '🔼 Più grande!',
   "it_gift": '🎁 Regalo!',
   "fl_caught": 'Scoperto!',
   "fl_wingLost": 'Ali perse!',
@@ -4979,6 +5046,10 @@ I18N['it'] = {
   "stBgm": '🎵 Musica',
   "stSfx": '🔔 Effetti',
   "stPad": '🎮 Modalità pad',
+  "rpWatching": '🎬 Replay',
+  "rpRecing": '⏺ Registrazione…',
+  "rpSaved": '🎥 Video salvato!',
+  "rpNoRec": 'Registrazione non supportata',
   "rpWatch": '🎬 Replay',
   "rpClose": '✕',
   "rpNone": 'Nessun replay',
@@ -5086,6 +5157,7 @@ I18N['it'] = {
   "gdOneThumb": 'Trascina col pollice',
   "gdKnobTap": 'Tocca il joystick!',
   "shopTitle": '🛍 Negozio Jelly',
+  "cafeTitle": '☕ Caffè ufficiale',
   "shReco": '⭐ Consigliati',
   "shSets": '🎁 Set',
   "shItems": '🎨 Singoli',
@@ -5246,7 +5318,7 @@ I18N['it'] = {
   "stCbHint": 'Attivalo se rosso e verde sembrano uguali — le gelatine avranno colori facili da distinguere',
   "phEmote": 'Emozione',
   "phPause": 'Pausa',
-  "it_mini": '🍄 Rimpicciolito!',
+  "it_mini": '🔽 Più piccolo!',
   "fl_miniEnd": 'Tornato normale!',
   "me_toolBush": 'Cespuglio',
   "me_toolWater": 'Acqua',
@@ -5417,7 +5489,7 @@ I18N['ja'] = {
   "it_balloon": '🎈 ふうせんに乗った!',
   "it_magnet": '🧲 じしゃく!',
   "it_shock": '💫 しょうげき波!',
-  "it_giant": '🍄 きょだい化!',
+  "it_giant": '🔼 おおきくなった!',
   "it_gift": '🎁 プレゼント箱!',
   "fl_caught": 'みつかった!',
   "fl_wingLost": 'はねロスト!',
@@ -5496,6 +5568,10 @@ I18N['ja'] = {
   "stBgm": '🎵 おんがく',
   "stSfx": '🔔 こうかおん',
   "stPad": '🎮 パッドモード',
+  "rpWatching": '🎬 リプレイ',
+  "rpRecing": '⏺ ろくが中…',
+  "rpSaved": '🎥 どうがをほぞんしたよ!',
+  "rpNoRec": 'このブラウザではほぞんできないよ',
   "rpWatch": '🎬 リプレイ',
   "rpClose": '✕',
   "rpNone": 'リプレイがないよ',
@@ -5603,6 +5679,7 @@ I18N['ja'] = {
   "gdOneThumb": 'おやゆびでスライド',
   "gdKnobTap": 'スティックをトン！',
   "shopTitle": '🛍 ゼリーショップ',
+  "cafeTitle": '☕ 公式カフェ',
   "shReco": '⭐ おすすめ',
   "shSets": '🎁 セット',
   "shItems": '🎨 単品',
@@ -5763,7 +5840,7 @@ I18N['ja'] = {
   "stCbHint": 'あかとみどりがにていたらオン — ゼリーがみわけやすいいろになるよ',
   "phEmote": 'きもち',
   "phPause": 'ちょっと',
-  "it_mini": '🍄 ちいさくなった!',
+  "it_mini": '🔽 ちいさくなった!',
   "fl_miniEnd": 'もどった!',
   "me_toolBush": 'くさむら',
   "me_toolWater": 'みず',
@@ -5934,7 +6011,7 @@ I18N['ko'] = {
   "it_balloon": '🎈 풍선 타기!',
   "it_magnet": '🧲 자석!',
   "it_shock": '💫 충격파!',
-  "it_giant": '🍄 거대화!',
+  "it_giant": '🔼 커졌다!',
   "it_gift": '🎁 선물 상자!',
   "fl_caught": '들켰다!',
   "fl_wingLost": '날개 잃음!',
@@ -6013,6 +6090,10 @@ I18N['ko'] = {
   "stBgm": '🎵 배경음악',
   "stSfx": '🔔 효과음',
   "stPad": '🎮 패드 모드',
+  "rpWatching": '🎬 다시 보기',
+  "rpRecing": '⏺ 저장 중… 끝나면 파일로 받아요',
+  "rpSaved": '🎥 동영상을 저장했어요!',
+  "rpNoRec": '이 브라우저에선 동영상 저장이 안 돼요',
   "rpWatch": '🎬 다시 보기',
   "rpClose": '✕',
   "rpNone": '다시 볼 판이 없어요',
@@ -6120,6 +6201,7 @@ I18N['ko'] = {
   "gdOneThumb": '엄지로 밀기',
   "gdKnobTap": '조이스틱 톡!',
   "shopTitle": '🛍 젤리 상점',
+  "cafeTitle": '☕ 공식 카페',
   "shReco": '⭐ 추천',
   "shSets": '🎁 세트',
   "shItems": '🎨 개별',
@@ -6280,7 +6362,7 @@ I18N['ko'] = {
   "stCbHint": '빨강·초록이 비슷하게 보이면 켜요 — 젤리들이 서로 잘 구분되는 색으로 보여요',
   "phEmote": '감정',
   "phPause": '잠깐',
-  "it_mini": '🍄 작아졌다!',
+  "it_mini": '🔽 작아졌다!',
   "fl_miniEnd": '원래대로!',
   "me_toolBush": '부쉬',
   "me_toolWater": '물',
@@ -6451,7 +6533,7 @@ I18N['pt'] = {
   "it_balloon": '🎈 Voo de balão!',
   "it_magnet": '🧲 Ímã!',
   "it_shock": '💫 Onda de choque!',
-  "it_giant": '🍄 Gigante!',
+  "it_giant": '🔼 Maior!',
   "it_gift": '🎁 Caixa de presente!',
   "fl_caught": 'Achado!',
   "fl_wingLost": 'Asas perdidas!',
@@ -6530,6 +6612,10 @@ I18N['pt'] = {
   "stBgm": '🎵 Música',
   "stSfx": '🔔 Efeitos',
   "stPad": '🎮 Modo controle',
+  "rpWatching": '🎬 Replay',
+  "rpRecing": '⏺ Gravando…',
+  "rpSaved": '🎥 Vídeo salvo!',
+  "rpNoRec": 'Gravação não suportada',
   "rpWatch": '🎬 Ver replay',
   "rpClose": '✕',
   "rpNone": 'Sem replay',
@@ -6637,6 +6723,7 @@ I18N['pt'] = {
   "gdOneThumb": 'Arraste com o polegar',
   "gdKnobTap": 'Toque no joystick!',
   "shopTitle": '🛍 Loja de gelatina',
+  "cafeTitle": '☕ Café oficial',
   "shReco": '⭐ Destaque',
   "shSets": '🎁 Kits',
   "shItems": '🎨 Itens',
@@ -6797,7 +6884,7 @@ I18N['pt'] = {
   "stCbHint": 'Ative se vermelho e verde parecem iguais — as gelatinas ficam com cores fáceis de distinguir',
   "phEmote": 'Emoção',
   "phPause": 'Pausa',
-  "it_mini": '🍄 Encolheu!',
+  "it_mini": '🔽 Menor!',
   "fl_miniEnd": 'Voltou ao normal!',
   "me_toolBush": 'Arbusto',
   "me_toolWater": 'Água',
@@ -6968,7 +7055,7 @@ I18N['ru'] = {
   "it_balloon": '🎈 Полёт на шаре!',
   "it_magnet": '🧲 Магнит!',
   "it_shock": '💫 Ударная волна!',
-  "it_giant": '🍄 Гигант!',
+  "it_giant": '🔼 Больше!',
   "it_gift": '🎁 Подарок!',
   "fl_caught": 'Заметили!',
   "fl_wingLost": 'Крылья!',
@@ -7047,6 +7134,10 @@ I18N['ru'] = {
   "stBgm": '🎵 Музыка',
   "stSfx": '🔔 Звуки',
   "stPad": '🎮 Режим геймпада',
+  "rpWatching": '🎬 Повтор',
+  "rpRecing": '⏺ Запись…',
+  "rpSaved": '🎥 Видео сохранено!',
+  "rpNoRec": 'Здесь запись не поддерживается',
   "rpWatch": '🎬 Повтор',
   "rpClose": '✕',
   "rpNone": 'Нет записи',
@@ -7154,6 +7245,7 @@ I18N['ru'] = {
   "gdOneThumb": 'Веди большим пальцем',
   "gdKnobTap": 'Нажми джойстик!',
   "shopTitle": '🛍 Желе-магазин',
+  "cafeTitle": '☕ Официальное кафе',
   "shReco": '⭐ Топ',
   "shSets": '🎁 Наборы',
   "shItems": '🎨 Вещи',
@@ -7314,7 +7406,7 @@ I18N['ru'] = {
   "stCbHint": 'Включи, если красный и зелёный похожи — желешки станут легко различимыми',
   "phEmote": 'Эмоция',
   "phPause": 'Пауза',
-  "it_mini": '🍄 Уменьшился!',
+  "it_mini": '🔽 Меньше!',
   "fl_miniEnd": 'Снова как был!',
   "me_toolBush": 'Куст',
   "me_toolWater": 'Вода',
@@ -7485,7 +7577,7 @@ I18N['zh-Hans'] = {
   "it_balloon": '🎈 坐气球！',
   "it_magnet": '🧲 磁铁！',
   "it_shock": '💫 冲击波！',
-  "it_giant": '🍄 巨大化！',
+  "it_giant": '🔼 变大了!',
   "it_gift": '🎁 礼物盒！',
   "fl_caught": '被发现！',
   "fl_wingLost": '失去翅膀！',
@@ -7564,6 +7656,10 @@ I18N['zh-Hans'] = {
   "stBgm": '🎵 音乐',
   "stSfx": '🔔 音效',
   "stPad": '🎮 手柄模式',
+  "rpWatching": '🎬 重播',
+  "rpRecing": '⏺ 录制中…',
+  "rpSaved": '🎥 视频已保存!',
+  "rpNoRec": '此浏览器不支持保存视频',
   "rpWatch": '🎬 观看重播',
   "rpClose": '✕',
   "rpNone": '没有可重播的对局',
@@ -7671,6 +7767,7 @@ I18N['zh-Hans'] = {
   "gdOneThumb": '用拇指滑动',
   "gdKnobTap": '点摇杆！',
   "shopTitle": '🛍 果冻商店',
+  "cafeTitle": '☕ 官方咖啡馆',
   "shReco": '⭐ 推荐',
   "shSets": '🎁 套装',
   "shItems": '🎨 单品',
@@ -7831,7 +7928,7 @@ I18N['zh-Hans'] = {
   "stCbHint": '如果红色和绿色看起来很像就打开 — 果冻会变成容易分辨的颜色',
   "phEmote": '表情',
   "phPause": '暂停',
-  "it_mini": '🍄 变小了!',
+  "it_mini": '🔽 变小了!',
   "fl_miniEnd": '变回来了!',
   "me_toolBush": '草丛',
   "me_toolWater": '水',
@@ -8002,7 +8099,7 @@ I18N['zh-Hant'] = {
   "it_balloon": '🎈 搭氣球！',
   "it_magnet": '🧲 磁鐵！',
   "it_shock": '💫 衝擊波！',
-  "it_giant": '🍄 巨大化！',
+  "it_giant": '🔼 變大了!',
   "it_gift": '🎁 禮物盒！',
   "fl_caught": '被發現！',
   "fl_wingLost": '失去翅膀！',
@@ -8081,6 +8178,10 @@ I18N['zh-Hant'] = {
   "stBgm": '🎵 音樂',
   "stSfx": '🔔 音效',
   "stPad": '🎮 手把模式',
+  "rpWatching": '🎬 重播',
+  "rpRecing": '⏺ 錄製中…',
+  "rpSaved": '🎥 影片已儲存!',
+  "rpNoRec": '此瀏覽器不支援儲存影片',
   "rpWatch": '🎬 觀看重播',
   "rpClose": '✕',
   "rpNone": '沒有可重播的對局',
@@ -8188,6 +8289,7 @@ I18N['zh-Hant'] = {
   "gdOneThumb": '用拇指滑動',
   "gdKnobTap": '點搖桿！',
   "shopTitle": '🛍 果凍商店',
+  "cafeTitle": '☕ 官方咖啡廳',
   "shReco": '⭐ 推薦',
   "shSets": '🎁 套裝',
   "shItems": '🎨 單品',
@@ -8348,7 +8450,7 @@ I18N['zh-Hant'] = {
   "stCbHint": '如果紅色和綠色看起來很像就打開 — 果凍會變成容易分辨的顏色',
   "phEmote": '表情',
   "phPause": '暫停',
-  "it_mini": '🍄 變小了!',
+  "it_mini": '🔽 變小了!',
   "fl_miniEnd": '變回來了!',
   "me_toolBush": '草叢',
   "me_toolWater": '水',
@@ -8546,6 +8648,10 @@ function applyI18n(){
     const v = t(el.getAttribute('data-i18n-ph'));
     if(v != null) el.placeholder = v;
   });
+  document.querySelectorAll('[data-i18n-title]').forEach(el=>{
+    const v = t(el.getAttribute('data-i18n-title'));
+    if(v != null){ el.title = v; el.setAttribute('aria-label', v); }
+  });
   try{
     document.documentElement.lang = LANG;
     document.documentElement.dir = isRTL() ? 'rtl' : 'ltr';
@@ -8606,6 +8712,7 @@ if(typeof window !== 'undefined' && window.addEventListener){
 
 // ---------- 상수 ----------
 const TILE = 48;
+const SHADOW_RGB = '70,50,110';   // [P1 토큰] 접지 그림자 — 연구: 순검정 대신 쿨 보라톤(파스텔에 가볍고 부드럽다). 전 젤리 그림자 단일 출처
 const HUD_H = 46;
 let COLS = 15, ROWS = 11, W = 0, H = 0;
 
@@ -8975,18 +9082,26 @@ function applyCtlLayout(){
   b.style.setProperty('--ctlSize', ((SET.ctlSize || 100) / 100).toFixed(3));
   // [v68] 직접 옮긴 자리를 반영. 둘이서는 두 사람 자리가 정해져 있어야 하므로 건드리지 않는다.
   const duo = (typeof gameMode !== 'undefined' && gameMode === 'duo');
+  const s = ((SET.ctlSize || 100) / 100);
   for(const key in CTL_IDS){
     const el = document.getElementById(CTL_IDS[key]);
     if(!el) continue;
     const p = (!duo && SET.ctlPos) ? SET.ctlPos[key] : null;
     if(p){
-      // 비율 → px. 요소 크기의 절반을 빼서 '가운데'가 그 지점에 오게 한다(끌 때 손끝 기준과 일치).
-      const w = el.offsetWidth || 0, h = el.offsetHeight || 0;
-      el.style.left  = Math.round(p.x * innerWidth  - w/2) + 'px';
-      el.style.top   = Math.round(p.y * innerHeight - h/2) + 'px';
+      // [v72] 좌표를 '요소의 가운데'로 해석한다.
+      //   v71은 offsetWidth/2를 빼서 중심을 맞췄는데, 타이틀에서는 조작부가 display:none이라
+      //   offsetWidth가 0으로 읽혔다 → 보정이 0인 채 저장/적용되어, 게임에 들어가면 요소 반지름만큼
+      //   (조이스틱 80px) 어긋났다. 실기에서 "편집한 자리와 게임 자리가 다르다"의 정체가 이것이다.
+      //   크기를 아예 몰라도 되는 방식으로 바꾼다 — left/top은 중심점, 중심 정렬은 transform이 한다.
+      el.style.left  = (p.x * innerWidth).toFixed(1) + 'px';
+      el.style.top   = (p.y * innerHeight).toFixed(1) + 'px';
       el.style.right = 'auto'; el.style.bottom = 'auto';
+      // CSS의 transform(scale + 모서리 origin)을 덮어쓴다. origin도 center로 맞춰야 크기 변경 시 안 밀린다.
+      el.style.transformOrigin = 'center center';
+      el.style.transform = 'translate(-50%, -50%) scale(' + s.toFixed(3) + ')';
     } else {
       el.style.left = ''; el.style.top = ''; el.style.right = ''; el.style.bottom = '';
+      el.style.transform = ''; el.style.transformOrigin = '';   // CSS 기본 배치로 복귀
     }
   }
   if(typeof fitCanvas === 'function' && typeof gameState !== 'undefined') fitCanvas();
@@ -10338,7 +10453,7 @@ const ITEM_DEF = {
   mega:   { icon:'🎈', col:'#ff4d6d', col2:'#c01840', k:'it_mega' },
   clone:  { icon:'👥', col:'#4dc4ff', col2:'#2f9ad0', k:'it_clone' },
   wing:   { icon:'🪽', col:'#ffe9f4', col2:'#d08ab0', k:'it_wing' },
-  mini:   { icon:'🍄', col:'#b06bff', col2:'#6a2fb0', k:'it_mini', halo:'62,16,110' },   // [미니] 보라 후광 = 먹으면 안 되는 것
+  mini:   { icon:'🔽', col:'#5fe3d0', col2:'#2fa596', k:'it_mini' },   // [v74] 작아졌다 = 스피드 버프. 청록(좋은 것). 보라 후광(위험) 제거.
   // ---- [v21 신규] ----
   toy:     { icon:'🧸', col:'#ff9ecb', col2:'#d1568f', k:'it_toy' },
   rocket:  { icon:'🚀', col:'#ff7043', col2:'#c33c14', k:'it_rocket' },
@@ -10346,23 +10461,62 @@ const ITEM_DEF = {
   balloon: { icon:'🎈', col:'#ffd166', col2:'#d09a1a', k:'it_balloon' },
   magnet:  { icon:'🧲', col:'#ff5d6c', col2:'#b02030', k:'it_magnet' },
   shock:   { icon:'💫', col:'#9fe8ff', col2:'#3f8fc0', k:'it_shock' },
-  giant:   { icon:'🍄', col:'#ff6fa8', col2:'#c02f68', k:'it_giant' },
+  giant:   { icon:'🔼', col:'#ff6fa8', col2:'#c02f68', k:'it_giant' },
   gift:    { icon:'🎁', col:'#ffe14d', col2:'#c79a1a', k:'it_gift' },
 };
 
-// ── 드랍률 밸런스 (가중치 합 1.0) ──────────────────────────────
-// 기준: 재미 · 영향력 · 희귀도. 저학년이 "운 좋게 얻는 재미"는 남기되,
-//       특정 아이템 하나로 승부가 갈리지 않도록 강한 것일수록 얇게 깐다.
-//   일반(합 .58) — 매 판 꾸준히 성장하는 맛. 없어도 게임이 성립.
-//   특수(합 .31) — 판을 흔들지만 피할 수 있다. 낮은 확률.
-//   최희귀(합 .022) — 바늘·날개는 '죽을 상황'을 통째로 무효화하므로 가장 얇게.
-//   미니(.05) — 몸·풍선만 작아진다(능력치 변화 없음).
+// ── [v72] 드랍률 밸런스 — 사용자가 준 순위를 기준으로, 아래 4가지만 근거를 대고 바꿨다.
+//   (합계는 pickWeighted가 정규화하므로 정확히 1.0일 필요는 없다)
+//
+//   ┌ 그대로 따른 것 ─────────────────────────────────────────────
+//   │ 1~4위(폭탄+1 · 스피드 · 팡 커짐 · 방어막)를 두껍게: 저학년이 판마다 '자란다'를 느끼는 축.
+//   │   특히 방어막은 한 번 살려주는 안전망이라 높은 게 맞다. 천사(최하위)도 동의 — 통과는 너무 세다.
+//   │
+//   ├ 바꾼 것 ①: 메가 풍선 5위 → 8위 (.042)
+//   │   먹는 순간 다음 폭탄이 판을 쓸어버린다. 5위면 판당 여러 번 나오고,
+//   │   그러면 '먼저 주운 사람이 이긴다'가 된다. 실력이 아니라 위치 운이 승부를 가른다.
+//   │
+//   ├ 바꾼 것 ②: 작아졌다 10위 → 17위 (.018)  ★가장 강하게 반대한 부분
+//   │   이건 유일하게 '먹으면 손해'인 아이템이다(SFX.bad가 울린다).
+//   │   저학년은 반짝이면 일단 먹는다 — 판단해서 피하는 게 아니다.
+//   │   10위(≈4~5%)면 한 판에 두세 번 당한다. 그 경험이 쌓이면 아이템 자체를 무서워하고,
+//   │   그건 이 게임의 핵심 재미(주우러 뛰어드는 것)를 정면으로 깎는다.
+//   │   완전히 빼진 않았다 — 가끔 걸리면 웃긴다. '가끔'이어야 웃긴다.
+//   │
+//   ├ 바꾼 것 ③: 선물 상자 18위 → 9위 (.038)
+//   │   '뭐가 나올까'는 저학년이 가장 좋아하는 감정인데 18위(≈1%)면 존재를 모른 채 끝난다.
+//   │   내용물이 주변에 아이템 1~3개를 뿌리는 것이라 그 자체로 세지 않다 → 자주 봐도 안전하다.
+//   │
+//   └ 바꾼 것 ④: 바늘 16위 → 18위, 로켓 17위 → 16위
+//       바늘은 3개까지 쌓이고 '죽을 상황'을 통째로 무효화한다 — 로켓(즉발 1회)보다 훨씬 세다.
+//       센 것이 더 희귀해야 한다는 원칙에 맞춰 둘을 맞바꿨다.
 const ITEM_W = {
-  range:.155, speed:.105, shield:.095, kick:.075, magnet:.075, shock:.075,   // 일반
-  bombup:.105,   // [v62] 폭탄 +1 — 스피드와 같은 비중. 제한 모드에서만 풀에 포함된다
-  ghost:.04, soap:.035, balloon:.035, gift:.035, toy:.035, mega:.035, clone:.035, rocket:.03, giant:.018,  // 특수
-  needle:.012, wing:.010,                                                    // 최희귀
-  mini:.05,                                                                  // 방해
+  // ── 성장 축 (자주) — 없으면 게임이 안 자란다
+  bombup: .130,   //  1위 · 제한 모드에서만 풀에 포함(무제한이면 자동 제외+정규화)
+  speed:  .115,   //  2위 · 체감이 가장 즉각적
+  range:  .105,   //  3위 · 성장의 맛
+  shield: .095,   //  4위 · 한 번 살려주는 안전망 (중첩은 코드에서 막혀 있다)
+  // ── [v74] 작아졌다 = 스피드 버프로 성격이 바뀌었다 → 재배치.
+  //   전 버전에서 '유일한 페널티라서 희귀하게'(17위)로 깔았는데, 이제 페널티가 아니므로 그 근거가 사라졌다.
+  //   효과가 speed(2위)와 사실상 같은 계열(이동속도↑)이다. 다만 speed는 영구·누적이고 mini는 5초 한정이라
+  //   speed보다는 약하다 → speed 바로 아래급이 아니라 '보통' 상단에 둔다. 자주 나와도 5초뿐이라 판을 안 망친다.
+  mini:   .070,   //  5위 · 5초 스피드 버프 (좁은 틈 통과 · 회피)
+  // ── 판을 흔들지만 피할 수 있는 것 (보통)
+  shock:  .060,   //  6위
+  magnet: .055,   //  7위
+  kick:   .050,   //  8위
+  mega:   .042,   //  9위 ← 사용자 5위에서 내림 (근거: 위 ①)
+  gift:   .038,   // 10위 ← 사용자 18위에서 올림 (근거: 위 ③, 이제 1~2개+안전풀이라 더 안전)
+  giant:  .036,   // 11위 · '커졌다!'
+  soap:   .034,   // 12위
+  balloon:.032,   // 13위
+  clone:  .030,   // 14위
+  toy:    .028,   // 15위
+  ghost:  .026,   // 16위
+  rocket: .020,   // 17위 ← 바늘과 맞바꿈 (근거: 위 ④)
+  // ── 희귀 (판을 뒤집는 것)
+  needle: .014,   // 18위 ← 로켓과 맞바꿈
+  wing:   .009,   // 19위 · 가장 셈(블록·폭탄 통과)
 };
 // [연속 제한] 판을 흔드는 강력 아이템 — POWER_GAP 회 안에 또 뽑히면 일반으로 대체
 const POWER_ITEMS = ['needle','wing','mega','rocket','giant','clone'];
@@ -10383,16 +10537,23 @@ function pickWeighted(){
   return 'range';
 }
 
-function dropItem(cx, cy){
-  _dropN++;
-  let kind = pickWeighted();
-  if(POWER_ITEMS.includes(kind)){
-    if(_dropN - _lastPowerN < POWER_GAP){
-      // [v24] 커스텀 맵에서 확률 0으로 막은 일반템은 대체 후보에서도 제외 (제작자 의도 존중)
-      const pool = MAP_IW ? COMMON_POOL.filter(k => MAP_IW[k] > 0) : COMMON_POOL;
-      kind = pool.length ? pool[Math.floor(Math.random()*pool.length)] : kind;
+function dropItem(cx, cy, forceKind){
+  // [v74] forceKind — 선물 상자가 '안전 풀'에서 뽑은 아이템을 그대로 놓을 때 쓴다.
+  //   지정되면 가중치 추첨·연속 강력템 억제를 건너뛴다(이미 안전한 것만 넘어오므로).
+  let kind;
+  if(forceKind){
+    kind = forceKind;
+  } else {
+    _dropN++;
+    kind = pickWeighted();
+    if(POWER_ITEMS.includes(kind)){
+      if(_dropN - _lastPowerN < POWER_GAP){
+        // [v24] 커스텀 맵에서 확률 0으로 막은 일반템은 대체 후보에서도 제외 (제작자 의도 존중)
+        const pool = MAP_IW ? COMMON_POOL.filter(k => MAP_IW[k] > 0) : COMMON_POOL;
+        kind = pool.length ? pool[Math.floor(Math.random()*pool.length)] : kind;
+      }
+      else _lastPowerN = _dropN;
     }
-    else _lastPowerN = _dropN;
   }
   items.push({cx, cy, kind, bob:Math.random()*6.28, grace:ITEM_GRACE});
   return kind;
@@ -10577,6 +10738,13 @@ function doShock(ent){
 }
 
 // [선물 상자] 주변 빈 칸에 랜덤 아이템 1~3개 — 겹치지 않게, 독도 나올 수 있다
+// [v74] 선물 상자 — '한 번에 아이템 여러 개'는 형평이 안 맞는다는 지적을 반영한다.
+//   블록 하나 깨는 사이 3개를 쓸어담으면 성실히 부순 사람이 손해다.
+//   → ① 개수를 1~2개로 줄이고(대부분 1개, 가끔 2개)
+//     ② 내용물에서 판을 뒤집는 강력템(메가·거대화·바늘·날개·로켓·분신·투명)을 제외한다.
+//        선물의 재미는 '뭐가 나올까'라는 두근거림이지 '한 방에 강해지는 것'이 아니다 →
+//        성장·소소한 재미 위주로만 나오면, 자주 열려도 판이 안 망가진다.
+const GIFT_POOL = ['range','speed','shield','kick','magnet','shock','soap','balloon','toy','mini','gift'];
 function openGift(ent){
   const cx = Math.floor(ent.x/TILE), cy = Math.floor(ent.y/TILE);
   const spots = [];
@@ -10584,10 +10752,12 @@ function openGift(ent){
     if((x===cx && y===cy) || !inMap(x,y)) continue;
     if(freeTile(x, y, false)) spots.push([x, y]);
   }
-  const n = Math.min(spots.length, 1 + Math.floor(Math.random()*3));
+  // 1개가 기본, 25% 확률로 2개 — '가끔 하나 더'의 기쁨은 남기되 쓸어담기는 막는다
+  const n = Math.min(spots.length, 1 + (Math.random() < 0.25 ? 1 : 0));
   for(let i=0; i<n; i++){
     const [sx, sy] = spots.splice(Math.floor(Math.random()*spots.length), 1)[0];
-    dropItem(sx, sy);           // items에 즉시 들어가므로 다음 freeTile 검사에서 자동 제외 = 겹침 없음
+    const kind = GIFT_POOL[Math.floor(Math.random()*GIFT_POOL.length)];   // 안전한 풀에서만
+    dropItem(sx, sy, kind);      // items에 즉시 들어가므로 다음 freeTile 검사에서 자동 제외 = 겹침 없음
   }
 }
 
@@ -10624,11 +10794,16 @@ function applyItem(e, kind, stack){
   else if(kind==='giant'){ e.giant = GIANT_T; e.mini = 0; e.shrinkT = 0; }   // 거대화는 미니를 덮어쓴다(구제)
   else if(kind==='gift'){ openGift(e); }
   else if(kind==='mini'){
-    // [미니] 몸과 풍선이 작아진다 — 파워·속도는 그대로. MINI_T초 뒤 원래 크기로.
+    // [v74 작아졌다 = 버프] 더 이상 페널티가 아니다.
+    //   몸이 작아지면 이동속도가 2배(entSpeed에서 GIANT_MUL 적용)가 되어 '빠릿빠릿 스피드' 아이템이다.
+    //   좁은 틈으로도 잘 빠지고 폭탄을 잽싸게 피한다 → 아이가 신나서 먹는 좋은 아이템.
+    //   그래서 나쁜 소리(SFX.bad)·보라 후광(위험 표시)을 걷어내고, 좋은 소리 + 청록 반짝으로 바꾼다.
     e.mini = MINI_T; e.giant = 0; e.shrinkT = 0;
-    spawnBreakFX(Math.floor(e.x/TILE), Math.floor(e.y/TILE), '#b06bff');
+    spawnBreakFX(Math.floor(e.x/TILE), Math.floor(e.y/TILE), '#5fe3d0');
   }
-  if(localFX(e)){ (kind==='mini' ? SFX.bad() : SFX.pickup()); }
+  e.pickAt = nowMs;                                                    // [P2-4] 획득 팝 타이밍(렌더가 읽음)
+  spawnBreakFX(Math.floor(e.x/TILE), Math.floor(e.y/TILE), def.col);   // [P2-4] 아이템 색 반짝 — 소리에 시각 피드백을 더한다
+  if(localFX(e)) SFX.pickup();
   metaOnItem(e, kind);   // [v23] 아이템 획득 미션·업적 집계
   netPushEv({ e:'it', i:entities.indexOf(e), k:kind,
               x:Math.round(e.x), y:Math.round(e.y), lb:label, cl:def.col });
@@ -11165,6 +11340,7 @@ function killEntity(ent){
     }
   }
   ent.state = 'dead';
+  if(!window.REDUCED){ window.shakeMag = Math.max(window.shakeMag || 0, 5.5); }   // [P3 juice] 터질 때 화면 살짝 흔들림 — 아동 대상 약하게, 동시 사망은 한 번(max)
   ent.deathOrder = ++deathCount;
   if(ent.lastHitBy && ent.lastHitBy !== ent) ent.lastHitBy.kills++;
   SFX.pop();
@@ -11353,6 +11529,7 @@ let acc = 0, last = performance.now();
 // ---------- 카메라 (플레이어 추적 + 줌인) ----------
 const ZOOM = 1.28;
 let camX = 0, camY = 0;
+window.shakeMag = 0;   // [P3 juice] 화면 흔들림 세기(감쇠). window.REDUCED와 일관, 검증 가능
 function curZoom(){
   // 2인: 캔버스 자체가 가로형 맵 전체 (fitCanvas가 화면 배치 담당) → 줌 없음
   return (gameMode==='duo') ? 1 : ZOOM;
@@ -11955,6 +12132,15 @@ onTap(pauseBtn, ()=>{
   if(rb) rb.style.display = (NET.on && NET.play) ? 'none' : '';
   if(quitBtn) quitBtn.textContent = (NET.on && NET.play) ? t('quitLeave') : t('quitTitle');
 });
+// [v73] 리플레이 비상 탈출 — 바가 안 보여도 반드시 나올 수 있어야 한다.
+//   v72에서 바가 통째로 사라졌을 때 나갈 방법이 없어 앱을 껐다 켜야 했다(크리티컬).
+//   출구는 하나면 안 된다: ESC(PC) · 뒤로가기(안드로이드) 두 경로를 항상 열어 둔다.
+addEventListener('keydown', e=>{
+  if(e.key === 'Escape' && typeof REP !== 'undefined' && REP){ e.preventDefault(); replayStop(); }
+});
+addEventListener('popstate', ()=>{
+  if(typeof REP !== 'undefined' && REP) replayStop();
+});
 // ── [v71] 리플레이 조작 ──
 {
   const rb = document.getElementById('repBtn');
@@ -11971,6 +12157,12 @@ onTap(pauseBtn, ()=>{
     if(!REP) return;
     REP.speed = REP.speed === 1 ? 2 : (REP.speed === 2 ? 0.5 : 1);   // 1x → 2x → 0.5x
     repSyncUI(); SFX.click && SFX.click();
+  });
+  const sv = document.getElementById('repSave');
+  if(sv) onTap(sv, ()=>{
+    SFX.click && SFX.click();
+    if(REPREC) repRecStop();      // 녹화 중이면 저장 마무리
+    else repRecStart();           // 아니면 처음부터 담기 시작
   });
   const cb = document.getElementById('repClose');
   if(cb) onTap(cb, ()=>{ SFX.click && SFX.click(); replayStop(); });
@@ -12786,6 +12978,11 @@ function drawItem(it){
 // drawItemGlyphRaw는 시간에 의존하지 않으므로 (kind, def.col)당 1장만 만들어 재사용한다 → 벡터 재드로보다 빠르다.
 const _glyphCache = new Map();
 const GLYPH_S = 80;                      // 캐시 해상도 (실제 사용 크기 25~30px → 넉넉)
+// [v72] 라벨에서 앞머리 이모지를 벗긴다 — 아이콘을 따로 그리는 화면(맵 에디터·상점)에서 중복을 없앤다.
+//   이모지 범위를 통째로 지우면 아랍어 등에서 정상 문자를 건드릴 위험이 있어, '앞쪽 기호 + 공백'만 자른다.
+function stripEmoji(s){
+  return String(s || '').replace(/^[\u{1F000}-\u{1FAFF}\u{2190}-\u{2BFF}\u{FE0F}\u{200D}]+\s*/u, '').trim();
+}
 function drawItemGlyph(g, kind, X, Y, s, def){
   if(!(s > 0)) return;
   const key = kind + '|' + ((def && def.col) || '');
@@ -12932,22 +13129,66 @@ function drawItemGlyphRaw(g, kind, X, Y, s, def){
     g.strokeStyle = '#fff'; g.lineWidth = s*0.06;
     g.beginPath(); g.moveTo(-s*0.1,s*0.4); g.lineTo(-s*0.02,s*0.16); g.stroke();
   } else if(kind === 'shield'){
-    g.fillStyle = '#ffd54d'; g.strokeStyle = '#c79a1a'; g.lineWidth = s*0.08;
-    g.beginPath(); g.moveTo(0,-s*0.5);
-    g.lineTo(s*0.4,-s*0.32); g.lineTo(s*0.4,s*0.08);
-    g.quadraticCurveTo(s*0.4,s*0.4, 0,s*0.52);
-    g.quadraticCurveTo(-s*0.4,s*0.4, -s*0.4,s*0.08);
-    g.lineTo(-s*0.4,-s*0.32); g.closePath(); g.fill(); g.stroke();
-    g.strokeStyle = '#fff'; g.lineWidth = s*0.1;
-    g.beginPath(); g.moveTo(-s*0.16,s*0.02); g.lineTo(-s*0.02,s*0.18); g.lineTo(s*0.2,-s*0.16); g.stroke();
+    // [v74] 방패 = 보호. 이모지 🛡️처럼 한눈에 읽히게 다듬는다:
+    //   위가 각지고 아래가 뾰족한 정통 방패 실루엣 + 파란 금속빛 그라데이션 + 큰 체크(✓).
+    //   전엔 노란 단색이라 '메달?'로도 보였다 → 파랑=지킴이라는 색 언어를 준다.
+    const sg = g.createLinearGradient(0, -s*0.5, 0, s*0.52);
+    sg.addColorStop(0, '#7cc4ff'); sg.addColorStop(0.5, '#3f8fe0'); sg.addColorStop(1, '#2a5fa8');
+    g.fillStyle = sg; g.strokeStyle = '#1e3f78'; g.lineWidth = s*0.07;
+    g.beginPath();
+    g.moveTo(0, -s*0.52);
+    g.lineTo(s*0.42, -s*0.34);
+    g.lineTo(s*0.42, s*0.04);
+    g.quadraticCurveTo(s*0.40, s*0.42, 0, s*0.56);   // 아래로 뾰족하게 모인다
+    g.quadraticCurveTo(-s*0.40, s*0.42, -s*0.42, s*0.04);
+    g.lineTo(-s*0.42, -s*0.34);
+    g.closePath(); g.fill(); g.stroke();
+    // 좌상단 하이라이트 = 금속 광택
+    g.fillStyle = 'rgba(255,255,255,.4)';
+    g.beginPath();
+    g.moveTo(0, -s*0.44); g.lineTo(s*0.30, -s*0.30); g.lineTo(s*0.30, -s*0.06);
+    g.quadraticCurveTo(0, -s*0.10, -s*0.04, -s*0.44); g.closePath(); g.fill();
+    // 굵은 흰 체크 — '지켜준다'의 확인 표시
+    g.strokeStyle = '#fff'; g.lineWidth = s*0.13; g.lineCap = 'round'; g.lineJoin = 'round';
+    g.beginPath();
+    g.moveTo(-s*0.20, s*0.02); g.lineTo(-s*0.04, s*0.20); g.lineTo(s*0.24, -s*0.18); g.stroke();
   } else if(kind === 'needle'){
-    g.strokeStyle = '#8ff0c0'; g.lineWidth = s*0.14;
-    g.beginPath(); g.moveTo(-s*0.34,s*0.34); g.lineTo(s*0.26,-s*0.26); g.stroke();
-    g.fillStyle = '#e8fff4';
-    g.beginPath(); g.moveTo(s*0.2,-s*0.42); g.lineTo(s*0.42,-s*0.2); g.lineTo(s*0.24,-s*0.18);
-    g.lineTo(s*0.18,-s*0.24); g.closePath(); g.fill();
-    g.strokeStyle = '#2fb070'; g.lineWidth = s*0.06;
-    g.beginPath(); g.moveTo(-s*0.34,s*0.2); g.lineTo(-s*0.2,s*0.34); g.stroke();
+    // [v74] 이모지 💉처럼 '주사기'로 또렷하게. 전엔 대각선 막대라 뭔지 애매했다.
+    //   좌하단→우상단 대각선으로 눕힌 주사기: 몸통(민트) → 바늘(은색) → 끝에 물방울,
+    //   반대쪽에 피스톤 손잡이. 부위를 다 그리면 '주사기'로 즉시 읽힌다.
+    g.save();
+    g.translate(0, s*0.02);
+    g.rotate(-Math.PI/4);   // 45° 눕힌다 (칸 안에 대각선으로 꽉 차게)
+    // 몸통 (원통)
+    const bg2 = g.createLinearGradient(0, -s*0.12, 0, s*0.12);
+    bg2.addColorStop(0, '#d8fff0'); bg2.addColorStop(0.5, '#8ff0c0'); bg2.addColorStop(1, '#4fc99a');
+    g.fillStyle = bg2; g.strokeStyle = '#2fb070'; g.lineWidth = s*0.035;
+    if(g.roundRect){ g.beginPath(); g.roundRect(-s*0.34, -s*0.11, s*0.46, s*0.22, s*0.05); g.fill(); g.stroke(); }
+    else { g.fillRect(-s*0.34, -s*0.11, s*0.46, s*0.22); }
+    // 눈금 3개
+    g.strokeStyle = 'rgba(47,176,112,.7)'; g.lineWidth = s*0.028;
+    for(let k=0;k<3;k++){ const x=-s*0.22+k*s*0.11;
+      g.beginPath(); g.moveTo(x, -s*0.07); g.lineTo(x, s*0.02); g.stroke(); }
+    // 바늘 (은색 가는 침)
+    g.strokeStyle = '#cfd8e0'; g.lineWidth = s*0.05; g.lineCap='round';
+    g.beginPath(); g.moveTo(s*0.12, 0); g.lineTo(s*0.46, 0); g.stroke();
+    g.strokeStyle = '#9aa8b4'; g.lineWidth = s*0.02;
+    g.beginPath(); g.moveTo(s*0.12, 0); g.lineTo(s*0.46, 0); g.stroke();
+    // 끝 물방울
+    g.fillStyle = '#7ce0ff';
+    g.beginPath(); g.arc(s*0.49, 0, s*0.045, 0, 6.283); g.fill();
+    // 피스톤 손잡이 (반대쪽)
+    g.fillStyle = '#4fc99a'; g.strokeStyle = '#2fb070'; g.lineWidth = s*0.035;
+    g.beginPath(); g.moveTo(-s*0.34, -s*0.07); g.lineTo(-s*0.44, -s*0.07);
+    g.lineTo(-s*0.44, s*0.07); g.lineTo(-s*0.34, s*0.07); g.closePath(); g.fill(); g.stroke();
+    g.fillStyle = '#4fc99a';
+    g.beginPath(); g.roundRect ? g.roundRect(-s*0.50, -s*0.13, s*0.06, s*0.26, s*0.02) : g.rect(-s*0.50,-s*0.13,s*0.06,s*0.26);
+    g.fill(); g.stroke();
+    // 몸통 광택
+    g.fillStyle = 'rgba(255,255,255,.45)';
+    g.beginPath(); g.roundRect ? g.roundRect(-s*0.30, -s*0.08, s*0.38, s*0.05, s*0.025) : g.rect(-s*0.30,-s*0.08,s*0.38,s*0.05);
+    g.fill();
+    g.restore();
   } else if(kind === 'ghost' || kind === 'freeze'){
     // 투명 — 귀여운 반투명 유령 (freeze는 레거시 별칭)
     g.globalAlpha = 0.88;
@@ -13134,27 +13375,38 @@ function drawItemGlyphRaw(g, kind, X, Y, s, def){
       g.restore();
     }
   } else if(kind === 'giant'){
-    // [거대화] 커지는 버섯 — 저학년에게 가장 익숙한 '커진다' 기호
-    g.fillStyle = '#ffeedd'; g.strokeStyle = '#c8956a'; g.lineWidth = s*0.045;
-    g.beginPath();
-    g.moveTo(-s*0.16,s*0.02); g.lineTo(s*0.16,s*0.02);
-    g.quadraticCurveTo(s*0.21,s*0.4, s*0.1,s*0.45);
-    g.lineTo(-s*0.1,s*0.45); g.quadraticCurveTo(-s*0.21,s*0.4, -s*0.16,s*0.02);
-    g.closePath(); g.fill(); g.stroke();
-    const gg = g.createRadialGradient(-s*0.14,-s*0.24,s*0.04,0,-s*0.04,s*0.48);
-    gg.addColorStop(0,'#ffa8ca'); gg.addColorStop(1,'#c02f68');
+    // [v72 커졌다!] 버섯을 버린다 — giant/mini가 둘 다 버섯이라 색만 다르고 형태가 같아
+    //   순간적으로 구분이 안 됐다(실기 제보). '내 젤리가 커진다'를 그대로 그린다:
+    //   작은 젤리 윤곽(전) → 큰 젤리(후) → 바깥으로 터지는 화살 4개.
+    //   mini는 이 그림의 정확한 반대(큰 윤곽 → 작은 젤리 → 안쪽 화살)로 그린다.
+    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = s*0.05;   // '전' 크기 = 점선 윤곽
+    g.setLineDash([s*0.09, s*0.07]);
+    g.beginPath(); g.arc(0, s*0.06, s*0.19, 0, 6.283); g.stroke();
+    g.setLineDash([]);
+    const gg = g.createRadialGradient(-s*0.14,-s*0.16,s*0.03, 0,s*0.02,s*0.42);
+    gg.addColorStop(0,'#ffb3d9'); gg.addColorStop(1,'#c02f68');
     g.fillStyle = gg; g.strokeStyle = '#8c1c46'; g.lineWidth = s*0.05;
-    g.beginPath(); g.moveTo(-s*0.45,s*0.04);
-    g.quadraticCurveTo(-s*0.45,-s*0.46, 0,-s*0.46);
-    g.quadraticCurveTo(s*0.45,-s*0.46, s*0.45,s*0.04);
+    g.beginPath();                                    // 커진 젤리 (젤리 실루엣: 위 둥글고 아래 넓다)
+    g.moveTo(-s*0.40, s*0.30);
+    g.quadraticCurveTo(-s*0.42,-s*0.30, 0,-s*0.30);
+    g.quadraticCurveTo(s*0.42,-s*0.30, s*0.40,s*0.30);
+    g.quadraticCurveTo(s*0.20,s*0.40, 0,s*0.40);
+    g.quadraticCurveTo(-s*0.20,s*0.40, -s*0.40,s*0.30);
     g.closePath(); g.fill(); g.stroke();
-    g.fillStyle = '#fff4f8';
-    g.beginPath(); g.arc(-s*0.23,-s*0.13,s*0.09,0,6.283); g.fill();
-    g.beginPath(); g.arc(s*0.15,-s*0.24,s*0.07,0,6.283); g.fill();
-    g.beginPath(); g.arc(s*0.28,-s*0.02,s*0.05,0,6.283); g.fill();
-    g.strokeStyle = '#ffe14d'; g.lineWidth = s*0.055;   // 커진다 = 바깥으로 벌어지는 화살
-    g.beginPath(); g.moveTo(-s*0.5,-s*0.3); g.lineTo(-s*0.38,-s*0.42); g.stroke();
-    g.beginPath(); g.moveTo(s*0.5,-s*0.3); g.lineTo(s*0.38,-s*0.42); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.85)';            // 젤리 광택
+    g.beginPath(); g.ellipse(-s*0.14,-s*0.14,s*0.10,s*0.07,-0.5,0,6.283); g.fill();
+    // 바깥으로 터지는 화살 4개 = '커진다'
+    g.strokeStyle = '#ffe14d'; g.lineWidth = s*0.07; g.lineCap = 'round';
+    for(const [dx, dy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){
+      const a = s*0.44, bnd = s*0.62;
+      g.beginPath(); g.moveTo(dx*a, dy*a); g.lineTo(dx*bnd, dy*bnd); g.stroke();
+      g.beginPath();                                  // 화살촉
+      g.moveTo(dx*bnd, dy*bnd);
+      g.lineTo(dx*(bnd-s*0.13), dy*bnd);
+      g.moveTo(dx*bnd, dy*bnd);
+      g.lineTo(dx*bnd, dy*(bnd-s*0.13));
+      g.stroke();
+    }
   } else if(kind === 'gift'){
     // [선물 상자] 리본 + 큼직한 나비매듭 — 열면 뭐가 나올지 모르는 두근거림
     g.fillStyle = '#ff5d8f'; g.strokeStyle = '#b82a58'; g.lineWidth = s*0.045;
@@ -13172,28 +13424,36 @@ function drawItemGlyphRaw(g, kind, X, Y, s, def){
     }
     g.beginPath(); g.arc(0,-s*0.29,s*0.07,0,6.283); g.fill(); g.stroke();
   } else if(kind === 'mini'){
-    // [미니] 거대화(🍄 분홍 대형 + 바깥 화살)의 대칭 — 보라 소형 버섯 + 안쪽으로 모이는 화살.
-    //   같은 버섯 그림이라 '크기가 변한다'가 바로 읽히고, 보라색 = '먹으면 안 되는 것'(후광과 동일 언어).
-    const K = 0.68;   // 버섯 자체가 작다 = 이 아이템이 하는 일
-    g.fillStyle = '#efe2ff'; g.strokeStyle = '#8a6ab0'; g.lineWidth = s*0.045;
-    g.beginPath();
-    g.moveTo(-s*0.16*K,s*0.06); g.lineTo(s*0.16*K,s*0.06);
-    g.quadraticCurveTo(s*0.21*K,s*0.4, s*0.1*K,s*0.45);
-    g.lineTo(-s*0.1*K,s*0.45); g.quadraticCurveTo(-s*0.21*K,s*0.4, -s*0.16*K,s*0.06);
-    g.closePath(); g.fill(); g.stroke();
-    const gm = g.createRadialGradient(-s*0.1,-s*0.14,s*0.03,0,-s*0.02,s*0.36);
+    // [v72 작아졌다!] 커졌다!의 정확한 반대. 같은 문법이라 나란히 놓으면 뜻이 바로 읽힌다:
+    //   큰 점선 윤곽(전) → 작은 젤리(후) → 안쪽으로 모이는 화살 4개. 보라 = '먹으면 안 되는 것'(후광과 같은 언어).
+    g.strokeStyle = 'rgba(255,255,255,.5)'; g.lineWidth = s*0.05;    // '전' 크기 = 큰 점선
+    g.setLineDash([s*0.09, s*0.07]);
+    g.beginPath(); g.arc(0, s*0.02, s*0.40, 0, 6.283); g.stroke();
+    g.setLineDash([]);
+    const gm = g.createRadialGradient(-s*0.07,-s*0.08,s*0.02, 0,s*0.02,s*0.22);
     gm.addColorStop(0,'#e3c4ff'); gm.addColorStop(1,'#6a2fb0');
-    g.fillStyle = gm; g.strokeStyle = '#3d1a66'; g.lineWidth = s*0.05;
-    g.beginPath(); g.moveTo(-s*0.45*K,s*0.08);
-    g.quadraticCurveTo(-s*0.45*K,-s*0.42*K, 0,-s*0.42*K);
-    g.quadraticCurveTo(s*0.45*K,-s*0.42*K, s*0.45*K,s*0.08);
+    g.fillStyle = gm; g.strokeStyle = '#3d1a66'; g.lineWidth = s*0.045;
+    g.beginPath();                                    // 작아진 젤리 (같은 실루엣, 작게)
+    g.moveTo(-s*0.19, s*0.14);
+    g.quadraticCurveTo(-s*0.20,-s*0.15, 0,-s*0.15);
+    g.quadraticCurveTo(s*0.20,-s*0.15, s*0.19,s*0.14);
+    g.quadraticCurveTo(s*0.10,s*0.19, 0,s*0.19);
+    g.quadraticCurveTo(-s*0.10,s*0.19, -s*0.19,s*0.14);
     g.closePath(); g.fill(); g.stroke();
-    g.fillStyle = '#f6efff';
-    g.beginPath(); g.arc(-s*0.15,-s*0.1,s*0.06,0,6.283); g.fill();
-    g.beginPath(); g.arc(s*0.1,-s*0.17,s*0.05,0,6.283); g.fill();
-    g.strokeStyle = '#b2ff66'; g.lineWidth = s*0.055;   // 작아진다 = 안쪽으로 모이는 화살 (거대화는 바깥)
-    g.beginPath(); g.moveTo(-s*0.5,-s*0.42); g.lineTo(-s*0.36,-s*0.28); g.stroke();
-    g.beginPath(); g.moveTo(s*0.5,-s*0.42); g.lineTo(s*0.36,-s*0.28); g.stroke();
+    g.fillStyle = 'rgba(255,255,255,.8)';
+    g.beginPath(); g.ellipse(-s*0.07,-s*0.07,s*0.05,s*0.035,-0.5,0,6.283); g.fill();
+    // 안쪽으로 모이는 화살 4개 = '작아진다'
+    g.strokeStyle = '#b2ff66'; g.lineWidth = s*0.07; g.lineCap = 'round';
+    for(const [dx, dy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){
+      const far = s*0.62, near = s*0.30;
+      g.beginPath(); g.moveTo(dx*far, dy*far); g.lineTo(dx*near, dy*near); g.stroke();
+      g.beginPath();                                  // 화살촉 (안쪽을 향한다)
+      g.moveTo(dx*near, dy*near);
+      g.lineTo(dx*(near+s*0.13), dy*near);
+      g.moveTo(dx*near, dy*near);
+      g.lineTo(dx*near, dy*(near+s*0.13));
+      g.stroke();
+    }
   } else if(kind === 'bombup'){
     // [v62] 폭탄 +1 — '폭탄이 하나 늘어난다'를 글자 없이 읽히게:
     //   ① 게임 속 폭탄과 같은 실루엣(둥근 몸 + 심지) ② 그 옆에 굵은 +.
@@ -15500,6 +15760,17 @@ function drawEyes(g, X, BY, R, eyeKind, ang, tint){
     g.fillStyle = 'rgba(247,245,247,.85)';             // 가느다란 틈 사이 광
     g.beginPath(); g.ellipse(ex - w2*0.32, ey - 0.75*k, w2*0.22, 0.42*k, -0.35, 0, 6.283); g.fill();
   };
+  // [모션] 대기 중 눈 깜빡임 — 뜬 눈(dot/big/ditto/kirby)만, 정면만, reduced-motion이면 생략.
+  //   nowMs(프레임 캐시) + 개체별 위상(X)으로 젤리마다 따로 깜빡인다. EY 중심으로 세로만 눌러 '깜빡'을 만든다.
+  let _blinkY = 1;
+  if(!hasAng && (!ek || ek==='dot' || ek==='big' || ek==='ditto' || ek==='kirby') && !window.REDUCED){
+    const _bxp = Math.abs((X|0));
+    const _bp = 3200 + (_bxp*131) % 1600;
+    const _bt = (nowMs + _bxp*257) % _bp;
+    if(_bt < 130) _blinkY = 0.15 + 0.85*Math.abs(Math.cos(_bt/130*Math.PI));
+  }
+  const _blinking = _blinkY < 0.999;
+  if(_blinking){ g.save(); g.translate(0, EY); g.scale(1, _blinkY); g.translate(0, -EY); }
   if(ek === 'happy'){
     // ^^ — 납작한 선이 아니라 '끝이 가늘어지는' 붓선 + 아래 옅은 그늘.
     // [v48] 잉크를 사탕구슬 눈의 코어색과 동일하게 — 뜬 눈/감은 눈이 같은 색이어야 한 캐릭터로 읽힌다
@@ -15567,6 +15838,7 @@ function drawEyes(g, X, BY, R, eyeKind, ang, tint){
     // 기본 (dot) — 공용 사탕구슬 렌더러. 실측: 눈 반폭 0.158R · 반높이 0.174R (몸 반폭 1.0R 기준)
     for(const [ex, ey] of eyes) drawEyeball(g, ex, ey, 3.8*k, 4.17*k, exo*0.32, eyo*0.14, { tint:tint });
   }
+  if(_blinking) g.restore();
 }
 // [연구: 볼터치] 스미코구라시·푸신·커비 공통 시그니처 — #FFB3C6, 반지름 0.18R, 가장자리 페더.
 // 눈 바깥 아래에 은은하게. dir=null 정면(양볼), dir=±1 옆면(보는 쪽 한 볼).
@@ -15757,7 +16029,7 @@ function _drawEntityCore(e){
   // 그림자 (발밑 위치 유지 — 캐릭터가 서 있는 칸 표시)
   // [풍선/추락] 몸이 떠도 그림자는 GY(바닥)에 남는다 — 높이차가 보이도록 살짝 작고 옅게
   const sh = (GY !== Y) ? 0.72 : 1;
-  ctx.fillStyle = 'rgba(70,50,110,' + (0.22*sh) + ')';   // [연구] 순검정 대신 쿨 보라톤 저알파 — 파스텔 화면에서 가볍고 부드럽다
+  ctx.fillStyle = 'rgba(' + SHADOW_RGB + ',' + (0.22*sh) + ')';   // [연구] 순검정 대신 쿨 보라톤 저알파 — 파스텔 화면에서 가볍고 부드럽다
   ctx.beginPath(); ctx.ellipse(X, GY+R*0.9, R*0.72*sh, R*0.28*sh, 0, 0, 6.283); ctx.fill();
   // 팀전 표시: 보호막으로 오해될 만한 링/아웃라인 없이,
   // 발밑 얇은 팀색 링(바닥 = 상태 아님) + 머리 위 작은 팀 아이콘만 사용
@@ -15779,11 +16051,16 @@ function _drawEntityCore(e){
   const _tm = texSquash(e.tex, _spd2, (e.id || 0) * 2.3);
   // [촉감 트레일] 걷는 동안 촉감 고유의 흔적 — 반짝이는 별가루, 꿀은 끈적 방울
   if(_spd2 > TILE*0.5 && e.state === 'alive') texTrailSpawn(_texFx, e.tex, X, GY, R, true);
+  // [P2-4] 획득 팝 — 방금 먹었으면 발밑 기준으로 잠깐 위로 '뿅'(0→1→0, 220ms). 이동 스쿼시와 겹쳐 자연스럽다.
+  const _pk = nowMs - (e.pickAt || -1e9);
+  const _pop = (_pk >= 0 && _pk < 220) ? Math.sin(_pk/220*Math.PI) : 0;
+  if(_pop > 0){ ctx.save(); ctx.translate(X, GY + R*0.9); ctx.scale(1 - 0.07*_pop, 1 + 0.12*_pop); ctx.translate(-X, -(GY + R*0.9)); }
   if(_tm.moving){ ctx.save(); ctx.translate(X, GY + R*0.9 - (_tm.hop||0)*R); ctx.scale(_tm.sx, _tm.sy);
     if(_tm.roll) ctx.rotate(_tm.roll);   // [v56] 발바닥 기준 = 구르는 느낌
     ctx.translate(-X, -(GY + R*0.9)); }   // [v50] hop = 그림자는 두고 몸만 뜬다
   drawJelly(ctx, X, BY, R, cbS(e).c, cbS(e).d, e.hat, e.eye, e.ang, nowMs, e.mouth, e.tex, e.eff, e.spark);   // [ANCHOR:drawJelly-caller]
   if(_tm.moving) ctx.restore();
+  if(_pop > 0) ctx.restore();
   if(spin) ctx.restore();
   // [날개 추락] 착지 후엔 어질어질 — 이동 불가 시간이 눈으로 보인다
   if(downed) drawDizzy(X, BY - R*1.05, R, fu);
@@ -16101,7 +16378,7 @@ function drawPodium(){
       rot = -ph * 6.283;
     }
     const by = floorY - bh - JR*0.9 - jump;
-    g.fillStyle = 'rgba(0,0,0,.28)';   // 착지 그림자
+    g.fillStyle = 'rgba(' + SHADOW_RGB + ',.28)';   // 착지 그림자
     g.beginPath(); g.ellipse(s.x, floorY-bh-3, JR*0.7*Math.max(0.35, 1 - jump/48), JR*0.22, 0, 0, 6.283); g.fill();
     // 자기 꾸미기(얼굴·재질·효과·모자)를 그대로 자랑 — drawJelly 단일 경로 유지, 회전은 캔버스 변환으로만
     if(rot){ g.save(); g.translate(s.x, by); g.rotate(rot); g.translate(-s.x, -by); }
@@ -16311,7 +16588,9 @@ function render(){
     ctx.beginPath(); ctx.rect(0, HUD_H, W, H - HUD_H); ctx.clip();
     ctx.translate(0, HUD_H);
     ctx.scale(curZoom(), curZoom());
-    ctx.translate(-camX, -camY);
+    let _shx = 0, _shy = 0;
+    if((window.shakeMag || 0) > 0.15){ const _sm = window.shakeMag; _shx = (Math.random()*2-1)*_sm; _shy = (Math.random()*2-1)*_sm; window.shakeMag = _sm * 0.85; } else window.shakeMag = 0;
+    ctx.translate(-camX + _shx, -camY + _shy);
 
     for(let y=0;y<ROWS;y++) for(let x=0;x<COLS;x++) drawTile(x,y,grid[idx(x,y)]);
     drawBoardDrip();     // [장식] 상단 파스텔 드립 — 테두리 블록 위에만 얹힌다
@@ -16350,6 +16629,12 @@ function render(){
 }
 
 let nowMs = 0;   // 렌더 프레임당 1회 캐시
+// [접근성] 모션 최소화 설정 — 캔버스 모션(눈 깜빡임 등)을 이 플래그로 끈다. (CSS는 media query가 담당)
+try{ const _mqR = matchMedia('(prefers-reduced-motion: reduce)');
+     window.REDUCED = _mqR.matches;
+     if(_mqR.addEventListener) _mqR.addEventListener('change', e=>{ window.REDUCED = e.matches; });
+     else if(_mqR.addListener) _mqR.addListener(e=>{ window.REDUCED = e.matches; }); }
+catch(e){ window.REDUCED = false; }
 
 function loop(now){
   try{
@@ -16726,6 +17011,9 @@ rebuildLogo();
     // 트레일 먼저 (젤리 아래) — 걷는 동안만 생성
     if(walking) texTrailSpawn(PREV.fx, CUSTOM.tex, 74, 108 + 54*0.25, 54, true);
     texTrailDraw(pg, PREV.fx, dt);
+    // [P1 접지 그림자] 프리뷰 본체는 그림자가 없어 떠 보였다 — 발밑 고정(hop해도 그림자는 바닥에 남음)
+    pg.fillStyle = 'rgba(' + SHADOW_RGB + ',.25)';
+    pg.beginPath(); pg.ellipse(74, 108 + 54*0.9, 54*0.7, 54*0.22, 0, 0, 6.283); pg.fill();
     pg.save();
     const footY = 108 + 54*0.9;
     pg.translate(74, footY - (sq.hop||0)*54); pg.scale(sq.sx, sq.sy);
@@ -17412,6 +17700,7 @@ function keyCapturing(){ return !!_keyWait; }
   let ctlBackup = null;    // 취소(재설정) 대비 — 저장을 누르기 전 상태
   const ceBar = document.getElementById('ctlEditBar');
 
+  let ctlEditPrev = null;   // 편집 전 화면 — 끝나면 돌려놓는다
   function ctlEditStart(){
     // 둘이서는 두 사람 자리가 정해져 있어야 서로 안 겹친다 → 편집 대상이 아니다
     if(gameMode === 'duo'){ metaToast(t('ceDuoNo')); SFX.bad && SFX.bad(); return; }
@@ -17421,25 +17710,18 @@ function keyCapturing(){ return !!_keyWait; }
     pop.style.display = 'none';                 // 조작 설정 팝업을 닫아 화면을 비운다
     if(window.settingsClose) window.settingsClose();
     if(ceBar) ceBar.style.display = 'flex';
-    // [v71] 판이 안 돌고 있어도(타이틀 등) '게임판이 여기쯤' 자리를 그려준다 —
-    //   기준이 없으면 조이스틱을 어디에 둬야 할지 알 수 없다.
-    const bd = document.getElementById('ctlEditBoard');
-    if(bd){
-      const cvEl = document.getElementById('cv');
-      const live = (typeof gameState !== 'undefined' && gameState === 'play' && cvEl && cvEl.offsetParent);
-      if(live){
-        const r = cvEl.getBoundingClientRect();
-        bd.style.width = Math.round(r.width) + 'px'; bd.style.height = Math.round(r.height) + 'px';
-        bd.style.left = Math.round(r.left + r.width/2) + 'px'; bd.style.top = Math.round(r.top + r.height/2) + 'px';
-        bd.textContent = '';
-      } else {
-        // 실제 보드가 잡는 크기와 같은 계산(16px 여백 · 상하 조작부 자리)으로 미리보기를 만든다
-        const w = Math.min(innerWidth - 16, 520);
-        const h = Math.min(innerHeight - 12 - 190, w * 1.35);
-        bd.style.width = Math.round(w) + 'px'; bd.style.height = Math.round(h) + 'px';
-        bd.style.left = '50%'; bd.style.top = '44%';
-        bd.textContent = t('ceBoard');
-      }
+    // [v72] 점선 사각형 대신 '진짜 게임 판'을 띄운다.
+    //   실기 제보: 타이틀 위에 점선만 그리니 버튼을 어디에 둬야 할지 감이 안 왔다.
+    //   판이 이미 돌고 있으면 그대로 두고(일시정지 없이 배경으로), 아니면 데모 판을 만든다.
+    //   gameState는 'ctledit' — step()이 'play'가 아니면 안 돌므로 젤리는 멈춰 있고 render()만 계속 그린다.
+    ctlEditPrev = null;
+    if(gameState !== 'play'){
+      ctlEditPrev = { view: curView, mode: gameMode, cnt: playerCount, map: selMap };
+      gameMode = 'solo'; playerCount = 4;
+      resetGame();
+      showView('game');
+      gameState = 'ctledit';                    // 'play'가 아니므로 시뮬레이션은 멈춘 채 화면만 나온다
+      if(typeof fitCanvas === 'function') fitCanvas();
     }
     applyCtlLayout();
   }
@@ -17449,6 +17731,13 @@ function keyCapturing(){ return !!_keyWait; }
     if(ceBar) ceBar.style.display = 'none';
     if(!save && ctlBackup) SET.ctlPos = ctlBackup;
     saveSettings();
+    // [v72] 데모 판을 띄웠다면 원래 화면으로 되돌린다 (편집 때문에 판이 시작된 것처럼 보이면 안 된다)
+    if(ctlEditPrev){
+      gameState = 'ready';
+      gameMode = ctlEditPrev.mode; playerCount = ctlEditPrev.cnt; selMap = ctlEditPrev.map;
+      showView(ctlEditPrev.view || 'title');
+      ctlEditPrev = null;
+    }
     applyCtlLayout();
   }
   // capture=true → 조작용 핸들러보다 먼저 잡는다
@@ -17777,7 +18066,7 @@ function drawCrossIcon(g, S){
     for(const j of jels){
       const px = (j.cx + (j.tx-j.cx)*j.prog + .5) * DT;
       const py = (j.cy + (j.ty-j.cy)*j.prog + .5) * DT;
-      g.fillStyle='rgba(0,0,0,.25)';
+      g.fillStyle='rgba(' + SHADOW_RGB + ',.25)';
       g.beginPath(); g.ellipse(px, py+DT*0.3, DT*0.3, DT*0.11, 0, 0, 6.283); g.fill();
       drawJelly(g, px, py, DT*0.4, j.c, j.d, j.hat, j.eye, j.prog<1 ? j.ang : null, tMs, j.mouth, j.tex);   // [ANCHOR:drawJelly-caller]
     }
@@ -18677,6 +18966,7 @@ const REP_HZ = 10, REP_MAX_FR = 1800;      // 10Hz · 3분
 const REP_KEY = 'mjpp_replay';
 let REC = null;          // 녹화 중 버퍼
 let REP = null;          // 재생 중 상태
+let REP_BACK = null;     // [v74] 재생을 시작한 화면 — 끝나면 여기로 돌아간다
 let _repAcc = 0;
 
 function recStart(){
@@ -18724,6 +19014,9 @@ function repHas(){ return !!repLoad(); }
 function replayStart(){
   const r = repLoad();
   if(!r){ metaToast(t('rpNone')); return; }
+  // [v73 안전장치] 재생에서 빠져나오는 길은 여러 개여야 한다.
+  //   v72에서 바가 사라지자 나갈 방법이 아예 없어 앱을 껐다 켜야 했다(실기 제보).
+  //   바가 어떤 이유로든 안 보이더라도 ① 뒤로가기 ② ESC 로는 반드시 나올 수 있게 한다.
   // 판 하나를 새로 세팅한 뒤, 매 프레임 스냅샷으로 덮어쓴다.
   COLS = r.cols; ROWS = r.rows;
   gameMode = r.mode; matchType = r.mt;
@@ -18737,20 +19030,41 @@ function replayStart(){
     if(sk.name) e.name = sk.name;
   });
   REP = { rec:r, i:0, acc:0, speed:1, paused:false };
+  REP_BACK = (curView === 'game') ? 'title' : curView;   // [v74] 돌아갈 곳 — 보통 'result'
   gameState = 'replay';
   showView('game');
+  // [v72] 오버레이(반투명 검은 막)를 걷는다 — 안 걷으면 판이 66% 어둡게 덮여 아무것도 안 보인다.
+  //   실기 제보 "리플레이가 너무 어둡다"의 원인이 이것. 판을 시작할 때와 같은 방식으로 닫는다.
+  overlay.classList.add('hidden');
   document.body.classList.add('replayOn');
   const bar = document.getElementById('repBar');
   if(bar) bar.style.display = 'flex';
+  // [v72] 동영상 저장을 못 하는 브라우저(일부 iOS Safari)에선 버튼을 아예 감춘다 —
+  //   눌렀는데 아무 일도 안 일어나면 고장으로 보인다.
+  const sv = document.getElementById('repSave');
+  if(sv) sv.style.display = repRecSupported() ? '' : 'none';
+  const bg = document.getElementById('repBadge');
+  if(bg) bg.style.display = '';
   repSyncUI();
 }
 function replayStop(){
+  if(!REP) return;       // [v73] 중복 호출 방어 (뒤로가기·ESC·버튼이 겹칠 수 있다)
   REP = null;
+  repRecStop();          // [v72] 동영상 녹화 중이면 정리
   gameState = 'over';
   document.body.classList.remove('replayOn');
   const bar = document.getElementById('repBar');
   if(bar) bar.style.display = 'none';
-  showView('title');
+  const bg = document.getElementById('repBadge');
+  if(bg) bg.style.display = 'none';
+  // [v74 크리티컬] 들어올 때 걷었던 검은 막을 반드시 되돌린다.
+  //   replayStart가 overlay를 hidden으로 만들어 판을 밝게 보여주는데, 나올 때 이걸 안 되돌리면
+  //   showView()가 어떤 화면을 켜도 부모(overlay)가 숨겨져 있어 아무것도 안 보인다.
+  //   → 캔버스와 조작부만 남은 '유령 화면'이 되어 아무 것도 누를 수 없었다(실기 제보).
+  //   상태 변수(curView)는 'title'로 멀쩡했기 때문에 변수만 보는 검사로는 절대 안 잡힌다.
+  overlay.classList.remove('hidden');
+  showView(REP_BACK || 'result');   // 온 곳으로 — 보통 결과 화면. 거기서 다시 보기를 또 누를 수 있다.
+  REP_BACK = null;
 }
 function replayStep(dt){
   if(!REP || REP.paused) return;
@@ -18763,7 +19077,86 @@ function replayStep(dt){
     netApplySnap(f);       // 온라인과 같은 복원 경로 — 필드가 하나만 어긋나도 여기서 티가 난다
     repSyncUI();
   }
-  if(REP.i >= REP.rec.fr.length){ REP.paused = true; repSyncUI(); }
+  // [v72] 프레임 사이 보간 — 녹화는 10Hz인데 화면은 60fps다. 스냅샷만 툭툭 놓으면
+  //   0.1초마다 순간이동해서 '프레임 드랍처럼 끊긴다'(실기 제보). 다음 스냅샷을 향해 부드럽게 끌어준다.
+  //   온라인 게스트가 남의 젤리를 보간하는 것과 같은 원리 — 다만 여기선 '다음 값'을 이미 알고 있으니 정확하다.
+  const nx = REP.rec.fr[REP.i];
+  if(nx && Array.isArray(nx.es)){
+    const a = Math.max(0, Math.min(1, REP.acc / fdt));     // 0=현재 프레임, 1=다음 프레임
+    nx.es.forEach((s, i)=>{
+      const e = entities[i];
+      if(!e || e.state !== 'alive') return;
+      const tx = s[0], ty = s[1];
+      // 순간이동(부활·워프)은 보간하면 화면을 가로지른다 → 한 칸(=TILE) 넘게 튀면 그냥 스냅
+      if(Math.abs(tx - e.x) > TILE * 1.5 || Math.abs(ty - e.y) > TILE * 1.5) return;
+      e.x += (tx - e.x) * a;
+      e.y += (ty - e.y) * a;
+    });
+  }
+  if(REP.i >= REP.rec.fr.length){
+    REP.paused = true;
+    if(REPREC) repRecStop();   // [v72] 끝까지 재생되면 저장을 자동으로 마무리 — 아이가 정지를 안 눌러도 파일이 남는다
+    repSyncUI();
+  }
+}
+// ═══ [v72] 리플레이 → 동영상 저장 ═══
+//   법적 검토: 저장되는 것은 이 게임이 그린 화면과 이 게임이 만든 소리뿐이다.
+//   외부 저작물(음원·폰트 렌더 결과·타사 이미지)이 들어가지 않고, 사용자가 자기 플레이를 저장하는 것이므로
+//   문제되지 않는다. 다만 MediaRecorder는 iOS Safari 지원이 들쭉날쭉하다 → 지원 여부를 먼저 확인하고
+//   안 되면 버튼 자체를 숨긴다(눌렀는데 아무 일도 안 일어나는 게 최악이다).
+let REPREC = null;
+function repRecSupported(){
+  try{
+    return typeof MediaRecorder !== 'undefined' &&
+           !!(cv.captureStream || cv.mozCaptureStream) &&
+           (MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ||
+            MediaRecorder.isTypeSupported('video/webm;codecs=vp8') ||
+            MediaRecorder.isTypeSupported('video/webm') ||
+            MediaRecorder.isTypeSupported('video/mp4'));
+  }catch(_e){ return false; }
+}
+function repRecMime(){
+  const cands = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm', 'video/mp4'];
+  for(const m of cands) if(MediaRecorder.isTypeSupported(m)) return m;
+  return '';
+}
+function repRecStart(){
+  if(REPREC) return;
+  if(!repRecSupported()){ metaToast(t('rpNoRec')); return; }
+  try{
+    const stream = (cv.captureStream ? cv.captureStream(30) : cv.mozCaptureStream(30));
+    const mime = repRecMime();
+    REPREC = { mr: new MediaRecorder(stream, mime ? { mimeType:mime, videoBitsPerSecond: 4_000_000 } : undefined),
+               chunks: [], mime };
+    REPREC.mr.ondataavailable = e => { if(e.data && e.data.size) REPREC.chunks.push(e.data); };
+    REPREC.mr.onstop = ()=>{
+      try{
+        const blob = new Blob(REPREC.chunks, { type: REPREC.mime || 'video/webm' });
+        const ext = (REPREC.mime || '').indexOf('mp4') >= 0 ? 'mp4' : 'webm';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        a.href = url;
+        a.download = 'JellyPangPang_' + d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate())
+                     + '_' + pad(d.getHours()) + pad(d.getMinutes()) + '.' + ext;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(()=> URL.revokeObjectURL(url), 20000);
+        metaToast(t('rpSaved'));
+      }catch(_e){ metaToast(t('rpNoRec')); }
+      REPREC = null;
+      repSyncUI();
+    };
+    REPREC.mr.start(250);
+    // 처음부터 담기도록 되감고 재생 — 중간부터 저장되면 "왜 반만 나오지"가 된다
+    REP.i = 0; REP.acc = 0; REP.paused = false;
+    metaToast(t('rpRecing'));
+    repSyncUI();
+  }catch(_e){ REPREC = null; metaToast(t('rpNoRec')); }
+}
+function repRecStop(){
+  if(!REPREC) return;
+  try{ if(REPREC.mr.state !== 'inactive') REPREC.mr.stop(); }catch(_e){ REPREC = null; }
 }
 function repSyncUI(){
   if(!REP) return;
@@ -18773,7 +19166,20 @@ function repSyncUI(){
   const sp = document.getElementById('repSpeed');
   if(sp) sp.textContent = REP.speed + 'x';
   const pb = document.getElementById('repPlay');
-  if(pb) pb.textContent = REP.paused ? '▶' : '⏸';
+  // 끝까지 봤으면 ▶가 '처음부터'가 된다 (아이는 다시 보기를 반복해서 본다)
+  const atEnd = REP.i >= REP.rec.fr.length - 1;
+  if(pb) pb.textContent = REP.paused ? (atEnd ? '↻' : '▶') : '⏸';
+  const tm = document.getElementById('repTime');
+  if(tm){
+    const f2 = s => Math.floor(s/60) + ':' + String(Math.floor(s%60)).padStart(2,'0');
+    tm.textContent = f2(REP.i / REP_HZ) + ' / ' + f2(REP.rec.fr.length / REP_HZ);
+  }
+  // [v72] 동영상 저장 버튼 — 녹화 중엔 빨간 점으로 표시
+  const rb = document.getElementById('repSave');
+  if(rb){
+    rb.textContent = REPREC ? '⏺' : '💾';
+    rb.classList.toggle('recing', !!REPREC);
+  }
 }
 function netSnapObj(){
   const es = entities.map(e => [
@@ -18982,7 +19388,7 @@ function netApplyEv(ev){
       break;
     }
     case 'it': {
-      if(mine){ (ev.k === 'mini' ? SFX.bad() : SFX.pickup()); }   // (아이템 햅틱 제거)
+      if(mine) SFX.pickup();   // [v74] mini도 이제 좋은 아이템 — 나쁜 소리 제거 (아이템 햅틱 제거)
       addFloater(ev.x, ev.y - TILE*0.6, ev.lb, ev.cl);
       if(ev.k === 'mini') spawnBreakFX(Math.floor(ev.x/TILE), Math.floor(ev.y/TILE), '#b06bff');
       break;
@@ -20482,6 +20888,7 @@ metaLoad();   // 부팅 시 로드 + 롤오버 + 연속접속 보너스
     });
   });
   onTap(document.getElementById('shopBtn'), ()=>{ SFX.click(); showView('shop'); renderTab(); });
+  onTap(document.getElementById('cafeBtn'), ()=>{ SFX.click(); var u='https://cafe.naver.com/mecchajellypangpang', w=null; try{ w=window.open(u,'_blank','noopener'); }catch(e){} if(!w){ location.href=u; } });
   onTap(document.getElementById('shopBack'), ()=>{ SFX.click(); showView('title'); });
 
   // 외부(게임 종료 보상 등)에서 지갑·패널 새로고침
@@ -21122,7 +21529,10 @@ function mapMiniRender(cv, m){
       if(ig){ ig.translate(22,22); drawItemGlyph(ig, k, 0, 0, 17, ITEM_DEF[k]); }
       row.appendChild(icv);
       const info = el('div', 'shInfo');
-      info.appendChild(el('div', 'shName', t(ITEM_DEF[k].k)));
+      // [v72] 아이콘은 왼쪽 캔버스(=인게임과 같은 그림) 하나만. 이름에 박힌 이모지를 지운다.
+      //   지금까지 '캔버스 글리프 + 이모지'가 나란히 나와 같은 아이템이 두 번 보였다(실기 제보).
+      //   이름 문자열은 인게임 플로터에도 쓰이므로 원본은 그대로 두고, 여기서만 벗긴다.
+      info.appendChild(el('div', 'shName', stripEmoji(t(ITEM_DEF[k].k))));
       const pct = el('div', 'shPieces');
       pctEls[k] = pct;
       info.appendChild(pct);
@@ -21627,7 +22037,7 @@ function mapMiniRender(cv, m){
     // 젤리 — 방 안에서 걸어다닌다. 인게임과 같은 drawJelly라 꾸민 그대로 보인다
     const R = H * 0.10;
     const px = roomPet.x*W, py = roomPet.y*H;
-    g.fillStyle = 'rgba(0,0,0,.22)';
+    g.fillStyle = 'rgba(' + SHADOW_RGB + ',.22)';
     g.beginPath(); g.ellipse(px, py + R*0.9, R*0.7, R*0.24, 0, 0, 6.283); g.fill();
     drawJelly(g, px, py, R, CUSTOM.c, CUSTOM.d, CUSTOM.hat === 'none' ? null : CUSTOM.hat,
               CUSTOM.eye, roomPet.moving ? (roomPet.dir > 0 ? 0 : Math.PI) : null,
@@ -21681,7 +22091,7 @@ function mapMiniRender(cv, m){
       sq = 1 + Math.sin(nowMs/70) * 0.06;         // 좌우로 눌렸다 폈다
       BY -= Math.abs(Math.sin(nowMs/110)) * R * 0.08;
     }
-    g.fillStyle = 'rgba(0,0,0,.22)';
+    g.fillStyle = 'rgba(' + SHADOW_RGB + ',.22)';
     g.beginPath(); g.ellipse(W/2, H*0.72 + R*0.92, R*0.72, R*0.20, 0, 0, 6.283); g.fill();
     g.save();
     g.translate(X, BY + R*0.9); g.rotate(rot); g.scale(sc*sq, sc/sq); g.translate(-X, -(BY + R*0.9));
@@ -22210,10 +22620,18 @@ function mapMiniRender(cv, m){
     ov.classList.add('out');
     setTimeout(end, 160);
   }
-  // [스킵 = 버튼만] 아무 데나 탭하면 스킵이 아니라 '소리 켜기'가 된다 (전역 audioUnlock이 받는다).
-  // 아이가 신나서 화면을 두드려도 인트로가 사라지지 않고, 그 순간부터 소리가 합류한다.
-  hint.style.pointerEvents = 'auto';
-  hint.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); skip(); });
+  // [v72 스킵 = 화면 전체] 요청대로 되돌린다.
+  //   v28에서 '버튼만'으로 바꿨던 이유는 아무 데나 탭하면 소리가 켜지기 전에 인트로가 사라져서였다.
+  //   그래서 여기서 소리를 먼저 풀고(audioUnlock) 스킵한다 — 두 마리를 다 잡는다.
+  //   어린 아이는 작은 힌트 글씨를 정확히 누르지 못한다. 화면 아무 데나가 맞다.
+  ov.style.pointerEvents = 'auto';
+  const skipAny = (e)=>{
+    try{ if(typeof audioUnlock === 'function') audioUnlock(); }catch(_e){}
+    skip();
+  };
+  ov.addEventListener('pointerdown', skipAny);
+  ov.addEventListener('click', skipAny);          // 포인터가 안 오는 환경 대비
+  hint.style.pointerEvents = 'none';              // 힌트는 안내문일 뿐 — 부모(ov)가 다 받는다
   addEventListener('resize', fit);
   requestAnimationFrame(frame);
 })();
