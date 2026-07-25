@@ -14,8 +14,11 @@
 <!-- [v70] 홈 화면에 추가하면 주소창 없이 '앱처럼' 실행된다(standalone).
      orientation을 portrait로 못 박으면 둘이서 가로 모드를 못 쓰므로 any로 둔다 —
      대신 판이 시작되면 코드에서 screen.orientation.lock()으로 그 판의 방향을 붙잡는다.
-     아이콘은 지정된 대표 이미지(icon-*.png)를 홈 화면에 넣는다 — 없으면 홈 화면에 스크린샷이 박힌다. -->
-<link rel="manifest" id="pwaManifest" href='data:application/manifest+json,{"name":"MECCHA Jelly PangPang","short_name":"멧챠 젤리팡팡","start_url":"./","scope":"./","display":"standalone","orientation":"any","background_color":"%2312142a","theme_color":"%2312142a"}'>
+     아이콘은 지정된 대표 이미지(icon-*.png)를 홈 화면에 넣는다 — 없으면 홈 화면에 스크린샷이 박힌다.
+     [중요] manifest는 반드시 '진짜 파일'(manifest.webmanifest)로 건다.
+     data:/blob: URL은 상대경로의 기준이 될 수 없어서 start_url·scope·icons가 전부 깨지고,
+     그러면 크롬이 앱 설치(WebAPK)를 포기하고 '북마크 바로가기'로 만들어 아이콘에 브라우저 배지가 붙는다. -->
+<link rel="manifest" href="./manifest.webmanifest">
 <!-- [앱 아이콘] 홈 화면/작업표시줄에 뜨는 대표 아이콘 (부팅 전에도 잡히도록 head에 정적으로 건다) -->
 <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="./icon-512.png">
@@ -23638,30 +23641,9 @@ function refreshDynamicTexts(){
 
   // 다른 코드(게임패드 B버튼 등)에서 열고 닫을 수 있게 노출
   applyCtlLayout();   // [v66] 저장된 조작부 배치를 부팅 직후 반영 (설정을 안 열어도 적용돼야 한다)
-  // [아이콘] 홈 화면에 추가했을 때 뜨는 앱 아이콘 — 지정된 대표 이미지(icon-*.png)를 쓴다.
-  //   manifest를 data URI로 박아두면 아이콘을 못 넣는다(중첩 인코딩) → 런타임에 Blob으로 갈아끼운다.
-  //   실패해도 게임에는 아무 영향이 없어야 하므로 통째로 try 안에 둔다.
-  try{
-    const man = {
-      name:'MECCHA Jelly PangPang', short_name:'멧챠 젤리팡팡',
-      start_url:'./', scope:'./', display:'standalone', orientation:'any',
-      background_color:'#12142a', theme_color:'#12142a',
-      icons: [
-        { src: './icon-192.png', sizes:'192x192', type:'image/png', purpose:'any' },
-        { src: './icon-512.png', sizes:'512x512', type:'image/png', purpose:'any' },
-        { src: './icon-512.png', sizes:'512x512', type:'image/png', purpose:'maskable' },
-      ],
-    };
-    const link = document.getElementById('pwaManifest');
-    if(link){
-      const url = URL.createObjectURL(new Blob([JSON.stringify(man)], { type:'application/manifest+json' }));
-      link.href = url;
-    }
-    // iOS는 manifest 아이콘을 안 본다 — apple-touch-icon을 따로 걸어야 홈 화면에 아이콘이 뜬다
-    const at = document.createElement('link');
-    at.rel = 'apple-touch-icon'; at.href = './icon-180.png';
-    document.head.appendChild(at);
-  }catch(_e){}
+  // [아이콘] manifest·아이콘은 이제 전부 head에 정적으로 박혀 있다(manifest.webmanifest, icon-*.png).
+  //   예전에는 여기서 젤리를 캔버스로 그려 Blob manifest로 갈아끼웠는데,
+  //   blob: URL은 상대경로의 기준이 못 돼 start_url·icons가 깨지고 앱 설치(WebAPK)가 실패했다 → 제거.
   window.settingsOpen = open;
   window.settingsClose = close;
   window.settingsIsOpen = ()=> pop.style.display !== 'none';
