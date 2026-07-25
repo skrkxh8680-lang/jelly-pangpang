@@ -1,8 +1,8 @@
 /* 멧챠 젤리팡팡 — 오프라인 캐시용 서비스워커
    index.html(게임 본체)을 캐시해 네트워크 없이도 앱이 켜지게 한다.
    게임을 새로 올릴 때는 아래 CACHE 버전만 올리면 자동으로 새 파일을 받는다. */
-const CACHE = 'jelly-pangpang-v75';
-const SHELL = ['./', './index.html'];
+const CACHE = 'jelly-pangpang-v143';
+const SHELL = ['./', './index.html', './icon-192.png', './icon-512.png', './icon-180.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)));
