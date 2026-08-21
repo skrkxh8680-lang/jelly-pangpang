@@ -5,12 +5,26 @@
         "source": "github",
         "repo": "anthropics/claude-plugins-official"
       }
+    },
+    "fluent-korean": {
+      "source": {
+        "source": "github",
+        "repo": "snflkd/fluent-korean"
+      }
+    },
+    "korean-skills": {
+      "source": {
+        "source": "github",
+        "repo": "daleseo/korean-skills"
+      }
     }
   },
   "enabledPlugins": {
     "ralph-loop@claude-plugins-official": true,
     "playwright@claude-plugins-official": true,
     "chrome-devtools-mcp@claude-plugins-official": true,
-    "frontend-design@claude-plugins-official": true
+    "frontend-design@claude-plugins-official": true,
+    "fluent-korean@fluent-korean": true,
+    "korean-skills@korean-skills": true
   }
 }
